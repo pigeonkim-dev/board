@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 목록</title>
+</head>
+<body>
+<h1>게시글 목록</h1>
+
+<a th:href="@{/board/posts/new}">새 글 작성</a>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>번호</th>
+        <th>제목</th>
+        <th>작성자</th>
+        <th>작성일</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="post : ${posts.content}">
+        <td th:text="${post.id}"></td>
+        <td>
+            <a th:href="@{/board/posts/{id}(id=${post.id})}" th:text="${post.title}"></a>
+        </td>
+        <td th:text="${post.authorNickname}"></td>
+        <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<div>
+    <span>페이지: <span th:text="${posts.number + 1}"></span> / <span th:text="${posts.totalPages}"></span></span>
+    <a th:if="${posts.hasPrevious()}" th:href="@{/board/posts(page=${posts.number - 1})}">이전</a>
+    <a th:if="${posts.hasNext()}" th:href="@{/board/posts(page=${posts.number + 1})}">다음</a>
+</div>
+</body>
+</html>

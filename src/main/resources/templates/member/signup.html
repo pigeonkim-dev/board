@@ -5,11 +5,24 @@
     <title>회원가입</title>
 </head>
 <body>
-<form th:method="POST" th:action="@{/member/signup}">
+<form th:method="POST" th:action="@{/member/signup}" th:object="${signupRequest}">
     <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-    <input type="text" name="email" placeholder="Email Address"/>
-    <input type="password" name="password" placeholder="Password"/>
-    <input type="text" name="name" placeholder="Full name"/>
+
+    <div>
+        <input type="text" th:field="*{email}" placeholder="Email Address"/>
+        <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" style="color:red"></p>
+    </div>
+
+    <div>
+        <input type="password" th:field="*{password}" placeholder="Password"/>
+        <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" style="color:red"></p>
+    </div>
+
+    <div>
+        <input type="text" th:field="*{name}" placeholder="Full name"/>
+        <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:red"></p>
+    </div>
+
     <button type="submit">Sign Up</button>
 </form>
 </body>
