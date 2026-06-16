@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>닉네임 수정</title>
+</head>
+<body>
+<h1>닉네임 수정</h1>
+
+<form th:method="POST" th:action="@{/board/profile/edit}">
+    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+    <input type="text" name="nickname" th:value="${nickname}" placeholder="닉네임 (2~20자)"/>
+    <button type="submit">수정</button>
+</form>
+</body>
+</html>
