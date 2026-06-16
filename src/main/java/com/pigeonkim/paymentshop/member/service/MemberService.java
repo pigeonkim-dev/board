@@ -3,8 +3,8 @@ package com.pigeonkim.paymentshop.member.service;
 import com.pigeonkim.paymentshop.member.domain.Member;
 import com.pigeonkim.paymentshop.member.domain.MemberRepository;
 import com.pigeonkim.paymentshop.member.domain.MemberRole;
-import com.pigeonkim.paymentshop.member.dto.LoginRequest;
 import com.pigeonkim.paymentshop.member.dto.SignupRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +16,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
 
+    @Transactional
     public void signup(SignupRequest request){
 
         if (memberRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -33,13 +34,5 @@ public class MemberService {
 
         memberRepository.save(member);
 
-    }
-    public void  login(LoginRequest request){
-        Member member = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
-
-        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
     }
 }

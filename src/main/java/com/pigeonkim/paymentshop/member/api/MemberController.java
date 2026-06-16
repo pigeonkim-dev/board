@@ -1,11 +1,12 @@
 package com.pigeonkim.paymentshop.member.api;
 
 
-import com.pigeonkim.paymentshop.member.dto.LoginRequest;
 import com.pigeonkim.paymentshop.member.dto.SignupRequest;
 import com.pigeonkim.paymentshop.member.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,14 +28,13 @@ public class MemberController {
     }
 
     @PostMapping("/member/signup")
-    public String signup(@ModelAttribute SignupRequest signupRequest) {
+    public String signup(@Valid @ModelAttribute SignupRequest signupRequest,
+                         BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors())
+            return "member/signup";
+
         memberService.signup(signupRequest);
         return "redirect:/member/login";
-    }
-
-    @PostMapping("/member/login")
-    public String login(@ModelAttribute LoginRequest loginRequest) {
-        memberService.login(loginRequest);
-        return "redirect:/";
     }
 }

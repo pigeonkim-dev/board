@@ -30,7 +30,7 @@ public class MemberServiceTest {
 
     @Test
     public  void signup_성공(){
-// given
+        // given
         SignupRequest request = new SignupRequest("test@test.com", "1234", "테스트");
         given(memberRepository.findByEmail(request.getEmail())).willReturn(Optional.empty());
         given(passwordEncoder.encode(request.getPassword())).willReturn("encodedPassword");
@@ -44,7 +44,7 @@ public class MemberServiceTest {
 
     @Test
     public void signup_이메일중복_예외(){
-// given
+        // given
         SignupRequest request = new SignupRequest("test@test.com", "1234", "테스트");
         given(memberRepository.findByEmail(request.getEmail())).willReturn(Optional.of(mock(Member.class)));
 
