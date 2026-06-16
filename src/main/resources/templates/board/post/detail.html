@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${post.title}">게시글 상세</title>
+</head>
+<body>
+<h1 th:text="${post.title}"></h1>
+
+<div>
+    <span>작성자: <span th:text="${post.authorNickname}"></span></span> |
+    <span>작성일: <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span></span>
+    <span th:if="${post.createdAt != post.updatedAt}">
+        | 수정일: <span th:text="${#temporals.format(post.updatedAt, 'yyyy-MM-dd HH:mm')}"></span>
+    </span>
+</div>
+
+<hr/>
+
+<div>
+    <p th:text="${post.content}" style="white-space: pre-wrap;"></p>
+</div>
+
+<hr/>
+
+<div>
+    <a th:href="@{/board/posts}">목록으로</a>
+    <a th:href="@{/board/posts/{id}/edit(id=${post.id})}">수정</a>
+
+    <form th:method="POST" th:action="@{/board/posts/{id}/delete(id=${post.id})}" style="display:inline">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+        <button type="submit" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+    </form>
+</div>
+</body>
+</html>
