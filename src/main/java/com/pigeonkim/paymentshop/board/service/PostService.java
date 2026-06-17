@@ -3,6 +3,7 @@ package com.pigeonkim.paymentshop.board.service;
 import com.pigeonkim.paymentshop.board.domain.BoardProfile;
 import com.pigeonkim.paymentshop.board.domain.Post;
 import com.pigeonkim.paymentshop.board.domain.PostRepository;
+import com.pigeonkim.paymentshop.board.domain.PostStatus;
 import com.pigeonkim.paymentshop.board.dto.PostRequest;
 import com.pigeonkim.paymentshop.board.dto.PostResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,17 +21,14 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Page<PostResponse> getPosts(Pageable pageable) {
-
-        Page<Post> posts = postRepository.findActivePosts(pageable);
-
+        Page<Post> posts = postRepository.findActivePosts(PostStatus.ACTIVE, pageable);
         return posts.map(PostResponse::from);
     }
 
     @Transactional(readOnly = true)
     public PostResponse getPost(Long postId) {
-        Post post = postRepository.findActiveById(postId)
+        Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
                 .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시물 입니다."));
-
         return PostResponse.from(post);
     }
 
@@ -54,7 +52,7 @@ public class PostService {
     @Transactional
     public void updatePost(String email, Long postId, PostRequest request) {
 
-        Post post = postRepository.findActiveById(postId)
+        Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
                 .orElseThrow(() -> new IllegalArgumentException("게시물이 없습니다."));
 
         BoardProfile boardProfile = boardProfileService.requireProfile(email);
@@ -69,7 +67,7 @@ public class PostService {
     @Transactional
     public void deletePost(String email, Long postId) {
 
-        Post post = postRepository.findActiveById(postId)
+        Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
                 .orElseThrow(() -> new IllegalArgumentException("게시물이 없습니다."));
 
         BoardProfile boardProfile = boardProfileService.requireProfile(email);
