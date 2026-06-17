@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${post.title}">게시글 상세</title>
+</head>
+<body>
+<h1 th:text="${post.title}"></h1>
+
+<div>
+    <span>작성자: <span th:text="${post.authorNickname}"></span></span> |
+    <span>작성일: <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span></span>
+    <span th:if="${post.createdAt != post.updatedAt}">
+        | 수정일: <span th:text="${#temporals.format(post.updatedAt, 'yyyy-MM-dd HH:mm')}"></span>
+    </span>
+</div>
+
+<hr/>
+
+<div>
+    <p th:text="${post.content}" style="white-space: pre-wrap;"></p>
+</div>
+
+<hr/>
+
+<div>
+    <a th:href="@{/board/posts}">목록으로</a>
+    <a th:href="@{/board/posts/{id}/edit(id=${post.id})}">수정</a>
+
+    <form th:method="POST" th:action="@{/board/posts/{id}/delete(id=${post.id})}" style="display:inline">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+        <button type="submit" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+    </form>
+</div>
+<hr/>
+
+<!-- 댓글 영역 -->
+<div th:if="${post.commentsEnabled}">
+    <h3>댓글 (<span th:text="${#lists.size(comments)}"></span>)</h3>
+
+    <!-- 댓글 목록 -->
+    <div th:each="comment : ${comments}" style="border-bottom: 1px solid #eee; padding: 10px 0;">
+        <div>
+            <strong th:text="${comment.authorNickname}"></strong>
+            <span th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}" style="color:gray; font-size:0.9em"></span>
+            <span th:if="${comment.createdAt != comment.updatedAt}" style="color:gray; font-size:0.9em">
+                (수정됨)
+            </span>
+        </div>
+        <p th:text="${comment.content}" style="white-space: pre-wrap;"></p>
+
+        <form th:method="POST"
+              th:action="@{/board/posts/{postId}/comments/{commentId}/delete(postId=${post.id}, commentId=${comment.id})}"
+              style="display:inline">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+            <button type="submit" onclick="return confirm('댓글을 삭제하시겠습니까?')">삭제</button>
+        </form>
+    </div>
+
+    <!-- 댓글 작성 폼 -->
+    <form th:method="POST"
+          th:action="@{/board/posts/{postId}/comments(postId=${post.id})}"
+          th:object="${commentRequest}"
+          style="margin-top: 20px;">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+        <textarea th:field="*{content}" rows="3" cols="50" placeholder="댓글을 입력하세요 (500자 이내)"></textarea>
+        <p th:if="${#fields.hasErrors('content')}" th:errors="*{content}" style="color:red"></p>
+        <button type="submit">댓글 작성</button>
+    </form>
+</div>
+
+<div th:unless="${post.commentsEnabled}">
+    <p style="color:gray">이 게시글은 댓글을 받지 않습니다.</p>
+</div>
+</body>
+</html>

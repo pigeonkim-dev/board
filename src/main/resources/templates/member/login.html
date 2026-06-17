@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인</title>
+</head>
+<body>
+<form th:method="POST" th:action="@{/member/login}">
+    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+    <input type="text" name="username" placeholder="Email Address"/>
+    <input type="password" name="password" placeholder="Password"/>
+    <button type="submit">Login</button>
+</form>
+</body>
+</html>
