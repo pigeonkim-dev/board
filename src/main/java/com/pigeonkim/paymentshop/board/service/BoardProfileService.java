@@ -50,7 +50,9 @@ public class BoardProfileService {
         BoardProfile profile = boardProfileRepository.findByMember(member)
                 .orElseThrow(() -> new IllegalArgumentException("프로필이 존재하지 않습니다."));
 
-        if (boardProfileRepository.existsByNickname(request.getNickname())) {
+        boolean isDuplicate = boardProfileRepository.existsByNickname(request.getNickname())
+                && !profile.getNickname().equals(request.getNickname());
+        if (isDuplicate) {
             throw new IllegalArgumentException("이미 사용중인 닉네임입니다.");
         }
 

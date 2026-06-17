@@ -10,6 +10,7 @@
 
 <form th:method="POST" th:action="@{/board/profile/setup}" th:object="${boardProfileRequest}">
     <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+    <input type="hidden" name="redirect" th:value="${redirect}"/>
     <input type="text" th:field="*{nickname}" placeholder="닉네임 (2~20자)"/>
     <p th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}" style="color:red"></p>
     <button type="submit">등록</button>
