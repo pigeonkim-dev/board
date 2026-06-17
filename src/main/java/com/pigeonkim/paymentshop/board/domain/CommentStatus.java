@@ -1,5 +1,5 @@
 package com.pigeonkim.paymentshop.board.domain;
 
-public enum PostStatus {
+public enum CommentStatus {
     ACTIVE, DELETED
 }
