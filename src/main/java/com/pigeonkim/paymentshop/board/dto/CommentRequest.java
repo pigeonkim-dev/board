@@ -14,6 +14,6 @@ import lombok.Setter;
 public class CommentRequest {
     @NotBlank(message = "댓글을 입력하세요")
     @Size(max = 500, message = "댓글은 500자 이내로 입력하세요")
-    public String content;
+    private String content;
 
 }

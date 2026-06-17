@@ -166,7 +166,6 @@ class PostServiceTest {
         ReflectionTestUtils.setField(boardProfileErr, "id", 2L);
 
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        //다른 프로필 반환
         given(boardProfileService.requireProfile(member.getEmail())).willReturn(boardProfileErr);
 
         assertThrows(IllegalArgumentException.class, () -> postService.updatePost(member.getEmail(), 1L, postRequest));
