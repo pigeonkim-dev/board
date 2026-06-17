@@ -1,7 +1,10 @@
 package com.pigeonkim.paymentshop.board.api;
 
+import com.pigeonkim.paymentshop.board.dto.CommentRequest;
+import com.pigeonkim.paymentshop.board.dto.CommentResponse;
 import com.pigeonkim.paymentshop.board.dto.PostRequest;
 import com.pigeonkim.paymentshop.board.dto.PostResponse;
+import com.pigeonkim.paymentshop.board.service.CommentService;
 import com.pigeonkim.paymentshop.board.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +21,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.validation.BindingResult;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class PostController {
     private final PostService postService;
+    private final CommentService commentService;  // ← 추가
 
     @GetMapping("/board/posts")
     public String list(@PageableDefault(size = 10) Pageable pageable, Model model) {
@@ -32,8 +38,14 @@ public class PostController {
 
     @GetMapping("/board/posts/{id}")
     public String detail(@PathVariable Long id, Model model) {
+
         PostResponse post = postService.getPost(id);
+        List<CommentResponse> comments = commentService.getComments(id);
+
         model.addAttribute("post", post);
+        model.addAttribute("comments", comments);
+        model.addAttribute("commentRequest", new CommentRequest());
+
         return "board/post/detail";
     }
 
