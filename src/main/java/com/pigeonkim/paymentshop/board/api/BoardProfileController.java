@@ -2,13 +2,11 @@ package com.pigeonkim.paymentshop.board.api;
 
 import com.pigeonkim.paymentshop.board.domain.BoardProfile;
 import com.pigeonkim.paymentshop.board.dto.BoardProfileRequest;
-import com.pigeonkim.paymentshop.board.dto.PostRequest;
-import com.pigeonkim.paymentshop.board.dto.PostResponse;
 import com.pigeonkim.paymentshop.board.service.BoardProfileService;
+import com.pigeonkim.paymentshop.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,19 +32,22 @@ public class BoardProfileController {
     @PostMapping("/board/profile/setup")
     public String setup(@Valid @ModelAttribute BoardProfileRequest request,
                         BindingResult bindingResult,
-                        @AuthenticationPrincipal User user,
+                        @AuthenticationPrincipal CustomUserDetails user,
                         @RequestParam(defaultValue = "/") String redirect) {
+
         if (bindingResult.hasErrors()) {
             return "board/profile/setup";
         }
-        boardProfileService.createProfile(user.getUsername(), request);
+
+        boardProfileService.createProfile(user.getEmail(), request);
         return "redirect:" + redirect;
     }
 
     @GetMapping("/board/profile/edit")
-    public String editForm(@AuthenticationPrincipal User user, Model model) {
+    public String editForm(@AuthenticationPrincipal CustomUserDetails user, Model model) {
 
-        BoardProfile profile = boardProfileService.getProfile(user.getUsername());
+        BoardProfile profile = boardProfileService.getProfile(user.getEmail());
+
         if (profile == null) {
             return "redirect:/board/profile/setup";
         }
@@ -61,11 +62,14 @@ public class BoardProfileController {
     @PostMapping("/board/profile/edit")
     public String edit(@Valid @ModelAttribute BoardProfileRequest request,
                        BindingResult bindingResult,
-                       @AuthenticationPrincipal User user) {
+                       @AuthenticationPrincipal CustomUserDetails user) {
+
         if (bindingResult.hasErrors()) {
             return "board/profile/edit";
         }
-        boardProfileService.updateProfile(user.getUsername(), request);
+
+        boardProfileService.updateProfile(user.getEmail(), request);
+
         return "redirect:/";
     }
 }

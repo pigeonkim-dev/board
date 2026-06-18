@@ -2,10 +2,10 @@ package com.pigeonkim.paymentshop.board.api;
 
 import com.pigeonkim.paymentshop.board.dto.CommentRequest;
 import com.pigeonkim.paymentshop.board.service.CommentService;
+import com.pigeonkim.paymentshop.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -23,16 +23,22 @@ public class CommentController {
     public String create(@PathVariable Long postId,
                          @Valid @ModelAttribute CommentRequest request,
                          BindingResult bindingResult,
-                         @AuthenticationPrincipal User user,
+                         @AuthenticationPrincipal CustomUserDetails user,
                          RedirectAttributes redirectAttributes) {
+
         if (bindingResult.hasErrors()) {
+
             String errorMessage = bindingResult.getFieldError() != null
                     ? bindingResult.getFieldError().getDefaultMessage()
                     : "입력값을 확인해주세요.";
+
             redirectAttributes.addFlashAttribute("commentError", errorMessage);
+
             return "redirect:/board/posts/" + postId;
         }
-        commentService.createComment(user.getUsername(), postId, request);
+
+        commentService.createComment(user.getEmail(), postId, request);
+
         return "redirect:/board/posts/" + postId;
     }
 
@@ -41,24 +47,32 @@ public class CommentController {
                          @PathVariable Long commentId,
                          @Valid @ModelAttribute CommentRequest request,
                          BindingResult bindingResult,
-                         @AuthenticationPrincipal User user,
+                         @AuthenticationPrincipal CustomUserDetails user,
                          RedirectAttributes redirectAttributes) {
+
         if (bindingResult.hasErrors()) {
+
             String errorMessage = bindingResult.getFieldError() != null
                     ? bindingResult.getFieldError().getDefaultMessage()
                     : "입력값을 확인해주세요.";
+
             redirectAttributes.addFlashAttribute("commentError", errorMessage);
+
             return "redirect:/board/posts/" + postId;
         }
-        commentService.updateComment(user.getUsername(), postId, commentId, request);
+
+        commentService.updateComment(user.getEmail(), postId, commentId, request);
+
         return "redirect:/board/posts/" + postId;
     }
 
     @PostMapping("/board/posts/{postId}/comments/{commentId}/delete")
     public String delete(@PathVariable Long postId,
                          @PathVariable Long commentId,
-                         @AuthenticationPrincipal User user) {
-        commentService.deleteComment(user.getUsername(), postId, commentId);
+                         @AuthenticationPrincipal CustomUserDetails user) {
+
+        commentService.deleteComment(user.getEmail(), postId, commentId);
+
         return "redirect:/board/posts/" + postId;
     }
 }

@@ -6,13 +6,13 @@ import com.pigeonkim.paymentshop.board.dto.PostRequest;
 import com.pigeonkim.paymentshop.board.dto.PostResponse;
 import com.pigeonkim.paymentshop.board.service.CommentService;
 import com.pigeonkim.paymentshop.board.service.PostService;
+import com.pigeonkim.paymentshop.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,13 +52,14 @@ public class PostController {
     @PostMapping("/board/posts/new")
     public String write(@Valid @ModelAttribute PostRequest request,
                         BindingResult bindingResult,
-                        @AuthenticationPrincipal User user) {
+                        @AuthenticationPrincipal CustomUserDetails user) {
 
         if (bindingResult.hasErrors()) {
             return "board/post/write";
         }
 
-        Long postId = postService.createPost(user.getUsername(), request);
+        Long postId = postService.createPost(user.getEmail(), request);
+
         return "redirect:/board/posts/" + postId;
     }
 
@@ -73,7 +74,7 @@ public class PostController {
     public String edit(@PathVariable Long id,
                        @Valid @ModelAttribute PostRequest request,
                        BindingResult bindingResult,
-                       @AuthenticationPrincipal User user,
+                       @AuthenticationPrincipal CustomUserDetails user,
                        Model model) {
 
         if (bindingResult.hasErrors()) {
@@ -82,14 +83,15 @@ public class PostController {
             return "board/post/edit";
         }
 
-        postService.updatePost(user.getUsername(), id, request);
+        postService.updatePost(user.getEmail(), id, request);
         return "redirect:/board/posts/" + id;
     }
 
     @PostMapping("/board/posts/{id}/delete")
     public String delete(@PathVariable Long id,
-                         @AuthenticationPrincipal User user) {
-        postService.deletePost(user.getUsername(), id);
+                         @AuthenticationPrincipal CustomUserDetails user) {
+
+        postService.deletePost(user.getEmail(), id);
         return "redirect:/board/posts";
     }
 
