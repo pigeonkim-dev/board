@@ -101,8 +101,8 @@ public class CommentServiceTest {
 
         ReflectionTestUtils.setField(post, "id", 1L);
 
-        given(boardProfileService.requireProfile(member.getEmail())).willReturn(author);
         given(postRepository.findActiveById(post.getId(), PostStatus.ACTIVE)).willReturn(Optional.of(post));
+        //given(boardProfileService.requireProfile(member.getEmail())).willReturn(author);
 
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("코멘트");
@@ -152,7 +152,7 @@ public class CommentServiceTest {
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("새 내용");
 
-        commentService.updateComment(member.getEmail(), comment.getId(), commentRequest);
+        commentService.updateComment(member.getEmail(), post.getId(), comment.getId(), commentRequest);
 
         assertEquals("새 내용", comment.getContent());
     }
@@ -216,7 +216,8 @@ public class CommentServiceTest {
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("코멘트");
 
-        assertThrows(IllegalArgumentException.class, () -> commentService.updateComment(member.getEmail(), comment.getId(), commentRequest));
+        assertThrows(IllegalArgumentException.class,
+                () -> commentService.updateComment(member.getEmail(), post.getId(), comment.getId(), commentRequest));
     }
 
     @Test
@@ -258,7 +259,7 @@ public class CommentServiceTest {
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
         given(boardProfileService.requireProfile(member.getEmail())).willReturn(author);
 
-        commentService.deleteComment(member.getEmail(), comment.getId());
+        commentService.deleteComment(member.getEmail(), post.getId(), comment.getId());
 
         assertEquals(CommentStatus.DELETED, comment.getStatus());
     }

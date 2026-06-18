@@ -14,6 +14,7 @@
     <tr>
         <th>번호</th>
         <th>제목</th>
+        <th>댓글</th>      <!-- ← 추가 -->
         <th>작성자</th>
         <th>작성일</th>
     </tr>
@@ -24,6 +25,7 @@
         <td>
             <a th:href="@{/board/posts/{id}(id=${post.id})}" th:text="${post.title}"></a>
         </td>
+        <td th:text="${post.commentCount}"></td>      <!-- ← 추가 -->
         <td th:text="${post.authorNickname}"></td>
         <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
     </tr>

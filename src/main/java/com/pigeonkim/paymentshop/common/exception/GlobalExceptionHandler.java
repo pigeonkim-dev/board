@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(NicknameRequiredException.class)
-    public String handleNicknameRequired(NicknameRequiredException e, HttpServletRequest request) {
-        String redirectUrl = request.getRequestURI();
-        return "redirect:/board/profile/setup?redirect=" + redirectUrl;
+    public String handleNicknameRequired(HttpServletRequest request) {
+        String referer = request.getHeader("Referer");
+        return "redirect:/board/profile/setup?redirect="
+                + (referer != null ? referer : "/");
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

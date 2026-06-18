@@ -36,7 +36,7 @@
 
 <!-- 댓글 영역 -->
 <div th:if="${post.commentsEnabled}">
-    <h3>댓글 (<span th:text="${#lists.size(comments)}"></span>)</h3>
+    <h3>댓글 (<span th:text="${post.commentCount}"></span>)</h3>
 
     <!-- 댓글 목록 -->
     <div th:each="comment : ${comments}" style="border-bottom: 1px solid #eee; padding: 10px 0;">
@@ -57,6 +57,10 @@
         </form>
     </div>
 
+    <!-- 댓글 에러 메시지 -->
+    <div th:if="${commentError}" style="color:red; margin-bottom:10px;">
+        <span th:text="${commentError}"></span>
+    </div>
     <!-- 댓글 작성 폼 -->
     <form th:method="POST"
           th:action="@{/board/posts/{postId}/comments(postId=${post.id})}"

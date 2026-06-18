@@ -1,9 +1,6 @@
 package com.pigeonkim.paymentshop.board.service;
 
-import com.pigeonkim.paymentshop.board.domain.BoardProfile;
-import com.pigeonkim.paymentshop.board.domain.Post;
-import com.pigeonkim.paymentshop.board.domain.PostRepository;
-import com.pigeonkim.paymentshop.board.domain.PostStatus;
+import com.pigeonkim.paymentshop.board.domain.*;
 import com.pigeonkim.paymentshop.board.dto.PostRequest;
 import com.pigeonkim.paymentshop.board.dto.PostResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,18 +15,23 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final BoardProfileService boardProfileService;
+    private final CommentRepository commentRepository;
 
     @Transactional(readOnly = true)
     public Page<PostResponse> getPosts(Pageable pageable) {
         Page<Post> posts = postRepository.findActivePosts(PostStatus.ACTIVE, pageable);
-        return posts.map(PostResponse::from);
+        return posts.map(post -> {
+            long commentCount = commentRepository.countByPostIdAndStatus(post.getId(), CommentStatus.ACTIVE);
+            return PostResponse.from(post, commentCount);
+        });
     }
 
     @Transactional(readOnly = true)
     public PostResponse getPost(Long postId) {
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시물 입니다."));
-        return PostResponse.from(post);
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다."));
+        long commentCount = commentRepository.countByPostIdAndStatus(postId, CommentStatus.ACTIVE);
+        return PostResponse.from(post, commentCount);
     }
 
     @Transactional
