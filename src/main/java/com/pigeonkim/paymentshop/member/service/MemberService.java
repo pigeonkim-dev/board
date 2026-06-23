@@ -23,12 +23,17 @@ public class MemberService {
             throw new IllegalArgumentException("이미 사용중인 이메일입니다.");
         }
 
+        if (memberRepository.existsByNickname(request.getNickname())) {
+            throw new IllegalArgumentException("이미 사용중인 닉네임입니다.");
+        }
+
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         Member member = Member.builder()
                 .email(request.getEmail())
                 .password(encodedPassword)
                 .name(request.getName())
+                .nickname(request.getNickname())
                 .role(MemberRole.USER)
                 .build();
 

@@ -3,6 +3,8 @@ package com.pigeonkim.paymentshop.board.service;
 import com.pigeonkim.paymentshop.board.domain.*;
 import com.pigeonkim.paymentshop.board.dto.PostRequest;
 import com.pigeonkim.paymentshop.board.dto.PostResponse;
+import com.pigeonkim.paymentshop.member.domain.Member;
+import com.pigeonkim.paymentshop.member.domain.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,8 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final BoardProfileService boardProfileService;
+    private final MemberRepository memberRepository;
     private final CommentRepository commentRepository;
+
+    private Member getMember(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+    }
 
     @Transactional(readOnly = true)
     public Page<PostResponse> getPosts(Pageable pageable) {
@@ -37,10 +44,10 @@ public class PostService {
     @Transactional
     public Long createPost(String email, PostRequest request) {
 
-        BoardProfile boardProfile = boardProfileService.requireProfile(email);
+        Member author = getMember(email);
 
         Post post = Post.builder()
-                .author(boardProfile)
+                .author(author)
                 .title(request.getTitle())
                 .content(request.getContent())
                 .commentsEnabled(request.isCommentsEnabled())
@@ -57,9 +64,9 @@ public class PostService {
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
                 .orElseThrow(() -> new IllegalArgumentException("게시물이 없습니다."));
 
-        BoardProfile boardProfile = boardProfileService.requireProfile(email);
+        Member author = getMember(email);
 
-        if (!post.isAuthor(boardProfile)) {
+        if (!post.isAuthor(author)) {
             throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
         }
 
@@ -72,9 +79,9 @@ public class PostService {
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
                 .orElseThrow(() -> new IllegalArgumentException("게시물이 없습니다."));
 
-        BoardProfile boardProfile = boardProfileService.requireProfile(email);
+        Member author = getMember(email);
 
-        if (!post.isAuthor(boardProfile)) {
+        if (!post.isAuthor(author)) {
             throw new IllegalArgumentException("작성자만 삭제 수 있습니다.");
         }
 

@@ -1,12 +1,11 @@
 package com.pigeonkim.paymentshop.board.service;
 
-import com.pigeonkim.paymentshop.board.domain.BoardProfile;
 import com.pigeonkim.paymentshop.board.domain.Post;
 import com.pigeonkim.paymentshop.board.domain.PostRepository;
 import com.pigeonkim.paymentshop.board.domain.PostStatus;
 import com.pigeonkim.paymentshop.board.dto.PostRequest;
-import com.pigeonkim.paymentshop.board.exception.NicknameRequiredException;
 import com.pigeonkim.paymentshop.member.domain.Member;
+import com.pigeonkim.paymentshop.member.domain.MemberRepository;
 import com.pigeonkim.paymentshop.member.domain.MemberRole;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,92 +27,64 @@ class PostServiceTest {
     private PostRepository postRepository;
 
     @Mock
-    private BoardProfileService boardProfileService;
+    private MemberRepository memberRepository;
 
     @InjectMocks
     private PostService postService;
 
-    @Test
-    void createPost_성공() {
-
-        Member member = Member.builder()
-                .email("test@test.com")
+    private Member member(String email, long id, String nickname) {
+        Member m = Member.builder()
+                .email(email)
                 .password("encoded")
                 .name("테스트")
+                .nickname(nickname)
                 .role(MemberRole.USER)
                 .build();
+        ReflectionTestUtils.setField(m, "id", id);
+        return m;
+    }
 
-        BoardProfile boardProfile = BoardProfile.builder()
-                .member(member)
-                .nickname("racoon")
-                .build();
+    private PostRequest postRequest() {
+        PostRequest r = new PostRequest();
+        r.setTitle("제목 테스트");
+        r.setContent("본문 테스트");
+        r.setCommentsEnabled(true);
+        return r;
+    }
 
-        PostRequest postRequest = new PostRequest();
-        postRequest.setTitle("제목 테스트");
-        postRequest.setContent("본문 테스트");
-        postRequest.setCommentsEnabled(true);
+    @Test
+    void createPost_성공() {
+        Member member = member("test@test.com", 1L, "racoon");
+        given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));
 
-        given(boardProfileService.requireProfile(member.getEmail())).willReturn(boardProfile);
-
-        postService.createPost(member.getEmail(), postRequest);
+        postService.createPost(member.getEmail(), postRequest());
 
         verify(postRepository, times(1)).save(any(Post.class));
     }
 
     @Test
-    void createPost_프로필없음_예외() {
+    void createPost_회원없음_예외() {
+        given(memberRepository.findByEmail("test@test.com")).willReturn(Optional.empty());
 
-        Member member = Member.builder()
-                .email("test@test.com")
-                .password("encoded")
-                .name("테스트")
-                .role(MemberRole.USER)
-                .build();
-
-        PostRequest postRequest = new PostRequest();
-        postRequest.setTitle("제목 테스트");
-        postRequest.setContent("본문 테스트");
-        postRequest.setCommentsEnabled(true);
-
-        given(boardProfileService.requireProfile(member.getEmail())).willThrow(new NicknameRequiredException("닉네임 설정이 필요합니다."));
-
-        assertThrows(NicknameRequiredException.class, () -> postService.createPost(member.getEmail(), postRequest));
+        assertThrows(IllegalArgumentException.class,
+                () -> postService.createPost("test@test.com", postRequest()));
     }
 
     @Test
     void updatePost_성공() {
-
-        Member member = Member.builder()
-                .email("test@test.com")
-                .password("encoded")
-                .name("테스트")
-                .role(MemberRole.USER)
-                .build();
-
-        ReflectionTestUtils.setField(member, "id", 1L);
-
-        PostRequest postRequest = new PostRequest();
-        postRequest.setTitle("제목 테스트");
-        postRequest.setContent("본문 테스트");
-        postRequest.setCommentsEnabled(true);
-
-        BoardProfile boardProfile = BoardProfile.builder()
-                .member(member)
-                .nickname("racoon")
-                .build();
-        ReflectionTestUtils.setField(boardProfile, "id", 1L);
+        Member member = member("test@test.com", 1L, "racoon");
 
         Post post = Post.builder()
                 .title("title123")
                 .content("content123")
-                .author(boardProfile)
+                .author(member)
                 .commentsEnabled(false)
                 .build();
 
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        given(boardProfileService.requireProfile(member.getEmail())).willReturn(boardProfile);
+        given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));
 
-        postService.updatePost(member.getEmail(), 1L, postRequest);
+        postService.updatePost(member.getEmail(), 1L, postRequest());
 
         assertEquals("제목 테스트", post.getTitle());
         assertEquals("본문 테스트", post.getContent());
@@ -122,84 +93,37 @@ class PostServiceTest {
 
     @Test
     void updatePost_작성자아님_예외() {
-
-        Member member = Member.builder()
-                .email("test@test.com")
-                .password("encoded")
-                .name("테스트")
-                .role(MemberRole.USER)
-                .build();
-        ReflectionTestUtils.setField(member, "id", 1L);
-
-        BoardProfile boardProfile = BoardProfile.builder()
-                .member(member)
-                .nickname("racoon")
-                .build();
-        ReflectionTestUtils.setField(boardProfile, "id", 1L);
+        Member author = member("test@test.com", 1L, "racoon");
+        Member other = member("test1@test.com", 2L, "racoon1");
 
         Post post = Post.builder()
                 .title("title123")
                 .content("content123")
-                .author(boardProfile)
+                .author(author)
                 .commentsEnabled(false)
                 .build();
 
-        PostRequest postRequest = new PostRequest();
-        postRequest.setTitle("제목 테스트");
-        postRequest.setContent("본문 테스트");
-        postRequest.setCommentsEnabled(true);
-
-        Member memberErr = Member.builder()
-                .email("test1@test.com")
-                .password("encoded")
-                .name("테스트1")
-                .role(MemberRole.USER)
-                .build();
-
-        ReflectionTestUtils.setField(memberErr, "id", 2L);
-
-        BoardProfile boardProfileErr = BoardProfile.builder()
-                .member(memberErr)
-                .nickname("racoon1")
-                .build();
-
-        ReflectionTestUtils.setField(boardProfileErr, "id", 2L);
-
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        given(boardProfileService.requireProfile(member.getEmail())).willReturn(boardProfileErr);
+        given(memberRepository.findByEmail(other.getEmail())).willReturn(Optional.of(other));
 
-        assertThrows(IllegalArgumentException.class, () -> postService.updatePost(member.getEmail(), 1L, postRequest));
+        assertThrows(IllegalArgumentException.class,
+                () -> postService.updatePost(other.getEmail(), 1L, postRequest()));
     }
 
     @Test
     void deletePost_성공() {
-
-        Member member = Member.builder()
-                .email("test@test.com")
-                .password("encoded")
-                .name("테스트")
-                .role(MemberRole.USER)
-                .build();
-
-        ReflectionTestUtils.setField(member, "id", 1L);
-
-        BoardProfile boardProfile = BoardProfile.builder()
-                .member(member)
-                .nickname("racoon")
-                .build();
-        ReflectionTestUtils.setField(boardProfile, "id", 1L);
+        Member member = member("test@test.com", 1L, "racoon");
 
         Post post = Post.builder()
                 .title("title123")
                 .content("content123")
-                .author(boardProfile)
+                .author(member)
                 .commentsEnabled(false)
                 .build();
-
         ReflectionTestUtils.setField(post, "id", 1L);
 
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        given(boardProfileService.requireProfile(member.getEmail())).willReturn(boardProfile);
+        given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));
 
         postService.deletePost(member.getEmail(), post.getId());
 
@@ -208,55 +132,21 @@ class PostServiceTest {
 
     @Test
     void deletePost_작성자아님_예외() {
-
-        Member member = Member.builder()
-                .email("test@test.com")
-                .password("encoded")
-                .name("테스트")
-                .role(MemberRole.USER)
-                .build();
-        ReflectionTestUtils.setField(member, "id", 1L);
-
-        BoardProfile boardProfile = BoardProfile.builder()
-                .member(member)
-                .nickname("racoon")
-                .build();
-        ReflectionTestUtils.setField(boardProfile, "id", 1L);
+        Member author = member("test@test.com", 1L, "racoon");
+        Member other = member("test1@test.com", 2L, "racoon1");
 
         Post post = Post.builder()
                 .title("title123")
                 .content("content123")
-                .author(boardProfile)
+                .author(author)
                 .commentsEnabled(false)
                 .build();
-
         ReflectionTestUtils.setField(post, "id", 1L);
 
-        PostRequest postRequest = new PostRequest();
-        postRequest.setTitle("제목 테스트");
-        postRequest.setContent("본문 테스트");
-        postRequest.setCommentsEnabled(true);
-
-        Member memberErr = Member.builder()
-                .email("test1@test.com")
-                .password("encoded")
-                .name("테스트1")
-                .role(MemberRole.USER)
-                .build();
-
-        ReflectionTestUtils.setField(memberErr, "id", 2L);
-
-        BoardProfile boardProfileErr = BoardProfile.builder()
-                .member(memberErr)
-                .nickname("racoon1")
-                .build();
-
-        ReflectionTestUtils.setField(boardProfileErr, "id", 2L);
-
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        //다른 프로필 반환
-        given(boardProfileService.requireProfile(member.getEmail())).willReturn(boardProfileErr);
+        given(memberRepository.findByEmail(other.getEmail())).willReturn(Optional.of(other));
 
-        assertThrows(IllegalArgumentException.class, () -> postService.deletePost(member.getEmail(), 1L));
+        assertThrows(IllegalArgumentException.class,
+                () -> postService.deletePost(other.getEmail(), 1L));
     }
 }

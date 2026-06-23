@@ -16,12 +16,14 @@ public class CustomUserDetails implements UserDetails {
     private final Long memberId;
     private final String email;
     private final String password;
+    private final String nickname;
     private final MemberRole role;
 
     public CustomUserDetails(Member member) {
         this.memberId = member.getId();
         this.email = member.getEmail();
         this.password = member.getPassword();
+        this.nickname = member.getNickname();
         this.role = member.getRole();
     }
 

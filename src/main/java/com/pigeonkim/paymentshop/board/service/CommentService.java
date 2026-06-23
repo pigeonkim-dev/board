@@ -3,6 +3,8 @@ package com.pigeonkim.paymentshop.board.service;
 import com.pigeonkim.paymentshop.board.domain.*;
 import com.pigeonkim.paymentshop.board.dto.CommentRequest;
 import com.pigeonkim.paymentshop.board.dto.CommentResponse;
+import com.pigeonkim.paymentshop.member.domain.Member;
+import com.pigeonkim.paymentshop.member.domain.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +16,12 @@ import java.util.List;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
-    private final BoardProfileService boardProfileService;
+    private final MemberRepository memberRepository;
+
+    private Member getMember(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+    }
 
     @Transactional(readOnly = true)
     public List<CommentResponse> getComments(Long postId) {
@@ -36,12 +43,12 @@ public class CommentService {
             throw new IllegalArgumentException("이 게시글은 댓글을 받지 않습니다.");
         }
 
-        // 3. 프로필 확인 (없으면 닉네임 설정 유도)
-        BoardProfile boardProfile = boardProfileService.requireProfile(email);
+        // 3. 회원 확인
+        Member author = getMember(email);
 
         Comment comment = Comment.builder()
                 .post(post)
-                .author(boardProfile)
+                .author(author)
                 .content(request.getContent())
                 .build();
 
@@ -62,9 +69,9 @@ public class CommentService {
             throw new IllegalArgumentException("게시글과 댓글이 일치하지 않습니다.");
         }
 
-        BoardProfile profile = boardProfileService.requireProfile(email);
+        Member author = getMember(email);
 
-        if (!comment.isAuthor(profile)) {
+        if (!comment.isAuthor(author)) {
             throw new IllegalArgumentException("작성자가 아닙니다.");
         }
 
@@ -89,9 +96,9 @@ public class CommentService {
             throw new IllegalArgumentException("삭제된 게시글의 댓글은 수정할 수 없습니다.");
         }
 
-        BoardProfile profile = boardProfileService.requireProfile(email);
+        Member author = getMember(email);
 
-        if (!comment.isAuthor(profile)) {
+        if (!comment.isAuthor(author)) {
             throw new IllegalArgumentException("작성자가 아닙니다.");
         }
 

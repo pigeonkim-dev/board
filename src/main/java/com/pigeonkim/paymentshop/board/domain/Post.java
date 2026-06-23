@@ -1,6 +1,7 @@
 package com.pigeonkim.paymentshop.board.domain;
 
 import com.pigeonkim.paymentshop.common.domain.BaseEntity;
+import com.pigeonkim.paymentshop.member.domain.Member;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -21,7 +22,7 @@ public class Post extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
-    private BoardProfile author;
+    private Member author;
 
     @Column(nullable = false)
     private String title;
@@ -37,7 +38,7 @@ public class Post extends BaseEntity {
     private PostStatus status;
 
     @Builder
-    public Post(BoardProfile author, String title, String content, boolean commentsEnabled) {
+    public Post(Member author, String title, String content, boolean commentsEnabled) {
         this.author = author;
         this.title = title;
         this.content = content;
@@ -55,7 +56,7 @@ public class Post extends BaseEntity {
         this.status = PostStatus.DELETED;
     }
 
-    public boolean isAuthor(BoardProfile profile) {
-        return this.author.getId().equals(profile.getId());
+    public boolean isAuthor(Member member) {
+        return this.author.getId().equals(member.getId());
     }
 }

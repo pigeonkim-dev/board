@@ -3,6 +3,7 @@ package com.pigeonkim.paymentshop.board.service;
 import com.pigeonkim.paymentshop.board.domain.*;
 import com.pigeonkim.paymentshop.board.dto.CommentRequest;
 import com.pigeonkim.paymentshop.member.domain.Member;
+import com.pigeonkim.paymentshop.member.domain.MemberRepository;
 import com.pigeonkim.paymentshop.member.domain.MemberRole;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,43 +29,43 @@ public class CommentServiceTest {
     private PostRepository postRepository;
 
     @Mock
-    private BoardProfileService boardProfileService;
+    private MemberRepository memberRepository;
 
     @InjectMocks
     private CommentService commentService;
 
-    @Test
-    void createComment_성공() {
-        // given - 데이터 준비
-        Member member = Member.builder()
-                .email("test@test.com")
+    private Member member(String email, long id, String nickname) {
+        Member m = Member.builder()
+                .email(email)
                 .password("encoded")
                 .name("테스트")
+                .nickname(nickname)
                 .role(MemberRole.USER)
                 .build();
+        ReflectionTestUtils.setField(m, "id", id);
+        return m;
+    }
 
-        ReflectionTestUtils.setField(member, "id", 1L);
-
-        BoardProfile author = BoardProfile.builder()
-                .nickname("Raccoon")
-                .member(member)
-                .build();
-
-        ReflectionTestUtils.setField(author, "id", 1L);
-
+    private Post post(Member author, boolean commentsEnabled) {
         Post post = Post.builder()
-                .commentsEnabled(true)
+                .commentsEnabled(commentsEnabled)
                 .author(author)
                 .title("title")
                 .content("content")
                 .build();
-
         ReflectionTestUtils.setField(post, "id", 1L);
+        return post;
+    }
+
+    @Test
+    void createComment_성공() {
+        Member member = member("test@test.com", 1L, "Raccoon");
+        Post post = post(member, true);
 
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("코멘트");
 
-        given(boardProfileService.requireProfile(member.getEmail())).willReturn(author);
+        given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));
         given(postRepository.findActiveById(post.getId(), PostStatus.ACTIVE)).willReturn(Optional.of(post));
 
         commentService.createComment(member.getEmail(), post.getId(), commentRequest);
@@ -74,80 +75,32 @@ public class CommentServiceTest {
 
     @Test
     void createComment_댓글비허용_예외() {
-
-        // given - 데이터 준비
-        Member member = Member.builder()
-                .email("test@test.com")
-                .password("encoded")
-                .name("테스트")
-                .role(MemberRole.USER)
-                .build();
-
-        ReflectionTestUtils.setField(member, "id", 1L);
-
-        BoardProfile author = BoardProfile.builder()
-                .nickname("Raccoon")
-                .member(member)
-                .build();
-
-        ReflectionTestUtils.setField(author, "id", 1L);
-
-        Post post = Post.builder()
-                .commentsEnabled(false)
-                .author(author)
-                .title("title")
-                .content("content")
-                .build();
-
-        ReflectionTestUtils.setField(post, "id", 1L);
+        Member member = member("test@test.com", 1L, "Raccoon");
+        Post post = post(member, false);
 
         given(postRepository.findActiveById(post.getId(), PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        //given(boardProfileService.requireProfile(member.getEmail())).willReturn(author);
 
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("코멘트");
 
-        assertThrows(IllegalArgumentException.class, () -> commentService.createComment(member.getEmail(), post.getId(), commentRequest));
+        assertThrows(IllegalArgumentException.class,
+                () -> commentService.createComment(member.getEmail(), post.getId(), commentRequest));
     }
 
     @Test
     void updateComment_성공() {
-
-        // given - 데이터 준비
-        Member member = Member.builder()
-                .email("test@test.com")
-                .password("encoded")
-                .name("테스트")
-                .role(MemberRole.USER)
-                .build();
-
-        ReflectionTestUtils.setField(member, "id", 1L);
-
-        BoardProfile author = BoardProfile.builder()
-                .nickname("Raccoon")
-                .member(member)
-                .build();
-
-        ReflectionTestUtils.setField(author, "id", 1L);
-
-        Post post = Post.builder()
-                .commentsEnabled(false)
-                .author(author)
-                .title("title")
-                .content("content")
-                .build();
-
-        ReflectionTestUtils.setField(post, "id", 1L);
+        Member member = member("test@test.com", 1L, "Raccoon");
+        Post post = post(member, false);
 
         Comment comment = Comment.builder()
                 .content("기존 내용")
                 .post(post)
-                .author(author).build();
-
+                .author(member)
+                .build();
         ReflectionTestUtils.setField(comment, "id", 1L);
 
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
-        given(boardProfileService.requireProfile(member.getEmail())).willReturn(author);
+        given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));
 
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("새 내용");
@@ -159,105 +112,41 @@ public class CommentServiceTest {
 
     @Test
     void updateComment_작성자아님_예외() {
-
-        // given - 데이터 준비
-        Member member = Member.builder()
-                .email("test@test.com")
-                .password("encoded")
-                .name("테스트")
-                .role(MemberRole.USER)
-                .build();
-
-        ReflectionTestUtils.setField(member, "id", 1L);
-
-        BoardProfile author = BoardProfile.builder()
-                .nickname("Raccoon")
-                .member(member)
-                .build();
-
-        ReflectionTestUtils.setField(author, "id", 1L);
-
-        Post post = Post.builder()
-                .commentsEnabled(false)
-                .author(author)
-                .title("title")
-                .content("content")
-                .build();
-
-        ReflectionTestUtils.setField(post, "id", 1L);
+        Member author = member("test@test.com", 1L, "Raccoon");
+        Member other = member("other@test.com", 3L, "Fox");
+        Post post = post(author, false);
 
         Comment comment = Comment.builder()
                 .content("기존 내용")
                 .post(post)
-                .author(author).build();
-
+                .author(author)
+                .build();
         ReflectionTestUtils.setField(comment, "id", 1L);
 
-        // given - 데이터 준비
-        Member member2 = Member.builder()
-                .email("test@test.com")
-                .password("encoded")
-                .name("테스트")
-                .role(MemberRole.USER)
-                .build();
-
-        ReflectionTestUtils.setField(member2, "id", 3L);
-
-        BoardProfile author2 = BoardProfile.builder()
-                .nickname("Raccoon")
-                .member(member)
-                .build();
-
-        ReflectionTestUtils.setField(author2, "id", 3L);
-
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
-        given(boardProfileService.requireProfile(member.getEmail())).willReturn(author2);
+        given(memberRepository.findByEmail(other.getEmail())).willReturn(Optional.of(other));
 
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("코멘트");
 
         assertThrows(IllegalArgumentException.class,
-                () -> commentService.updateComment(member.getEmail(), post.getId(), comment.getId(), commentRequest));
+                () -> commentService.updateComment(other.getEmail(), post.getId(), comment.getId(), commentRequest));
     }
 
     @Test
     void deleteComment_성공() {
-
-        // given - 데이터 준비
-        Member member = Member.builder()
-                .email("test@test.com")
-                .password("encoded")
-                .name("테스트")
-                .role(MemberRole.USER)
-                .build();
-
-        ReflectionTestUtils.setField(member, "id", 1L);
-
-        BoardProfile author = BoardProfile.builder()
-                .nickname("Raccoon")
-                .member(member)
-                .build();
-
-        ReflectionTestUtils.setField(author, "id", 1L);
-
-        Post post = Post.builder()
-                .commentsEnabled(false)
-                .author(author)
-                .title("title")
-                .content("content")
-                .build();
-
-        ReflectionTestUtils.setField(post, "id", 1L);
+        Member member = member("test@test.com", 1L, "Raccoon");
+        Post post = post(member, false);
 
         Comment comment = Comment.builder()
                 .content("기존 내용")
                 .post(post)
-                .author(author).build();
-
+                .author(member)
+                .build();
         ReflectionTestUtils.setField(comment, "id", 1L);
 
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
-        given(boardProfileService.requireProfile(member.getEmail())).willReturn(author);
+        given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));
 
         commentService.deleteComment(member.getEmail(), post.getId(), comment.getId());
 

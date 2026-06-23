@@ -31,8 +31,9 @@ public class MemberServiceTest {
     @Test
     public  void signup_성공(){
         // given
-        SignupRequest request = new SignupRequest("test@test.com", "1234", "테스트");
+        SignupRequest request = new SignupRequest("test@test.com", "1234", "테스트", "라쿤");
         given(memberRepository.findByEmail(request.getEmail())).willReturn(Optional.empty());
+        given(memberRepository.existsByNickname(request.getNickname())).willReturn(false);
         given(passwordEncoder.encode(request.getPassword())).willReturn("encodedPassword");
 
         // when
@@ -45,8 +46,19 @@ public class MemberServiceTest {
     @Test
     public void signup_이메일중복_예외(){
         // given
-        SignupRequest request = new SignupRequest("test@test.com", "1234", "테스트");
+        SignupRequest request = new SignupRequest("test@test.com", "1234", "테스트", "라쿤");
         given(memberRepository.findByEmail(request.getEmail())).willReturn(Optional.of(mock(Member.class)));
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> memberService.signup(request));
+    }
+
+    @Test
+    public void signup_닉네임중복_예외(){
+        // given
+        SignupRequest request = new SignupRequest("test@test.com", "1234", "테스트", "라쿤");
+        given(memberRepository.findByEmail(request.getEmail())).willReturn(Optional.empty());
+        given(memberRepository.existsByNickname(request.getNickname())).willReturn(true);
 
         // when & then
         assertThrows(IllegalArgumentException.class, () -> memberService.signup(request));

@@ -23,6 +23,11 @@
         <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:red"></p>
     </div>
 
+    <div>
+        <input type="text" th:field="*{nickname}" placeholder="닉네임 (2~20자)"/>
+        <p th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}" style="color:red"></p>
+    </div>
+
     <button type="submit">Sign Up</button>
 </form>
 </body>
