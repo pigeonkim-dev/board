@@ -1,10 +1,19 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Payment Shop</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Payment Board')}"></head>
 <body>
-<h1>Hello World</h1>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div class="app-card p-5 text-center">
+        <h1 class="fw-bold mb-3">Payment Board</h1>
+        <p class="text-secondary mb-4">Spring Boot로 만든 게시판입니다. 글을 쓰고 댓글로 이야기를 나눠보세요.</p>
+        <a class="btn btn-primary btn-lg" th:href="@{/board/posts}">게시판 둘러보기</a>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 </body>
 </html>

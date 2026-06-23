@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>오류</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('오류')}"></head>
 <body>
-<h1>오류가 발생했습니다</h1>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<p th:text="${errorMessage}" style="color:red"></p>
+<main class="container">
+    <div class="auth-wrap text-center">
+        <div class="app-card p-5">
+            <h1 class="h4 mb-3">⚠️ 오류가 발생했습니다</h1>
+            <p class="text-danger" th:text="${errorMessage}"></p>
+            <div class="mt-4 d-flex gap-2 justify-content-center">
+                <a class="btn btn-primary" th:href="@{/}">홈으로</a>
+                <a class="btn btn-outline-secondary" href="javascript:history.back()">이전 페이지</a>
+            </div>
+        </div>
+    </div>
+</main>
 
-<div>
-    <a th:href="@{/}">홈으로</a>
-    <a href="javascript:history.back()">이전 페이지로</a>
-</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 </body>
 </html>
