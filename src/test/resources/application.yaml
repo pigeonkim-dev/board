@@ -1,0 +1,37 @@
+# 테스트 전용 설정.
+#
+# Gradle 은 테스트를 돌릴 때 src/test/resources 를 src/main/resources 보다
+# 앞에 놓는다. 그래서 이름이 같은 이 파일이 운영 설정을 통째로 가린다.
+# 프로필을 따로 켤 필요가 없다.
+#
+# 실행 전에 데이터베이스를 한 번 만들어야 한다:
+#     createdb board_test
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/board_test
+    username: ${DB_USERNAME}
+    password: ""
+    driver-class-name: org.postgresql.Driver
+
+  # 테스트 스키마도 Flyway 가 만든다.
+  # ddl-auto 로 만들면 Hibernate 가 만든 스키마를 검증하게 되어
+  # 실제 운영 스키마와 조용히 갈라진다. H2 를 거부한 이유와 같다.
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    open-in-view: false
+    show-sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.flywaydb: INFO

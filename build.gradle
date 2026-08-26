@@ -24,6 +24,17 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+	// Flyway — 스키마 마이그레이션. 세 개가 다 필요하다.
+	//  spring-boot-flyway          Boot 4 는 자동설정을 모듈별로 쪼갰다.
+	//                              FlywayAutoConfiguration 이 여기 있다.
+	//                              이게 없으면 라이브러리는 있는데 아무도 안 부른다.
+	//  flyway-core                 Flyway 본체
+	//  flyway-database-postgresql  Flyway 10 부터 DB별 지원이 분리됐다
+	implementation 'org.springframework.boot:spring-boot-flyway'
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
