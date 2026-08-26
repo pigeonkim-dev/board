@@ -26,9 +26,9 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<CommentResponse> getComments(Long postId) {
 
-        List<Comment> commnetList = commentRepository.findActiveCommentsByPostId(postId, CommentStatus.ACTIVE);
+        List<Comment> commentList = commentRepository.findActiveCommentsByPostId(postId, CommentStatus.ACTIVE);
 
-        return commnetList.stream().map(CommentResponse::from).toList();
+        return commentList.stream().map(CommentResponse::from).toList();
     }
 
     @Transactional
@@ -93,7 +93,7 @@ public class CommentService {
         }
 
         if (comment.getPost().getStatus() == PostStatus.DELETED) {
-            throw new IllegalArgumentException("삭제된 게시글의 댓글은 수정할 수 없습니다.");
+            throw new IllegalArgumentException("삭제된 게시글의 댓글은 삭제할 수 없습니다.");
         }
 
         Member author = getMember(email);

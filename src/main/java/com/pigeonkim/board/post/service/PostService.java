@@ -36,7 +36,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostResponse getPost(Long postId) {
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
         long commentCount = commentRepository.countByPostIdAndStatus(postId, CommentStatus.ACTIVE);
         return PostResponse.from(post, commentCount);
     }
@@ -62,7 +62,7 @@ public class PostService {
     public void updatePost(String email, Long postId, PostRequest request) {
 
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("게시물이 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
 
         Member author = getMember(email);
 
@@ -77,12 +77,12 @@ public class PostService {
     public void deletePost(String email, Long postId) {
 
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("게시물이 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
 
         Member author = getMember(email);
 
         if (!post.isAuthor(author)) {
-            throw new IllegalArgumentException("작성자만 삭제 수 있습니다.");
+            throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
         }
 
         post.delete();

@@ -4,7 +4,7 @@ import com.pigeonkim.board.member.domain.Member;
 import com.pigeonkim.board.member.domain.MemberRepository;
 import com.pigeonkim.board.member.domain.MemberRole;
 import com.pigeonkim.board.member.dto.SignupRequest;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
