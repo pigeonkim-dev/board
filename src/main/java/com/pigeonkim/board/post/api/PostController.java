@@ -30,17 +30,26 @@ public class PostController {
     private final CommentService commentService;  // ← 추가
 
     @GetMapping("/board/posts")
-    public String list(@PageableDefault(size = 10) Pageable pageable, Model model) {
-        Page<PostResponse> posts = postService.getPosts(pageable);
+    public String list(@PageableDefault(size = 10) Pageable pageable,
+                       Model model,
+                       @AuthenticationPrincipal CustomUserDetails user) {
+
+        String email = user != null ? user.getUsername() : null;
+
+        Page<PostResponse> posts = postService.getPosts(pageable, email);
         model.addAttribute("posts", posts);
         return "board/post/list";
     }
 
     @GetMapping("/board/posts/{id}")
-    public String detail(@PathVariable Long id, Model model) {
+    public String detail(@PathVariable Long id,
+                         Model model,
+                         @AuthenticationPrincipal CustomUserDetails user) {
 
-        PostResponse post = postService.getPost(id);
-        List<CommentResponse> comments = commentService.getComments(id);
+        String email = user != null ? user.getUsername() : null;
+
+        PostResponse post = postService.getPost(id, email);
+        List<CommentResponse> comments = commentService.getComments(id, email);
 
         model.addAttribute("post", post);
         model.addAttribute("comments", comments);
@@ -64,8 +73,13 @@ public class PostController {
     }
 
     @GetMapping("/board/posts/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
-        PostResponse post = postService.getPost(id);
+    public String editForm(@PathVariable Long id,
+                           Model model,
+                           @AuthenticationPrincipal CustomUserDetails user) {
+
+        String email = user != null ? user.getUsername() : null;
+
+        PostResponse post = postService.getPost(id, email);
         model.addAttribute("post", post);
         return "board/post/edit";
     }
@@ -78,7 +92,9 @@ public class PostController {
                        Model model) {
 
         if (bindingResult.hasErrors()) {
-            PostResponse post = postService.getPost(id);
+            String email = user != null ? user.getUsername() : null;
+
+            PostResponse post = postService.getPost(id, email);
             model.addAttribute("post", post);
             return "board/post/edit";
         }

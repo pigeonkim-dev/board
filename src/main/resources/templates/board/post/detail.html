@@ -19,9 +19,9 @@
 
     <div class="d-flex gap-2 mb-4">
         <a class="btn btn-outline-secondary" th:href="@{/board/posts}">목록</a>
-        <a class="btn btn-outline-primary" sec:authorize="isAuthenticated()"
+        <a class="btn btn-outline-primary" th:if="${post.canEdit}"
            th:href="@{/board/posts/{id}/edit(id=${post.id})}">수정</a>
-        <form sec:authorize="isAuthenticated()" th:method="POST"
+        <form th:if="${post.canDelete}" th:method="POST"
               th:action="@{/board/posts/{id}/delete(id=${post.id})}"
               onsubmit="return confirm('삭제하시겠습니까?')">
             <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
@@ -46,14 +46,39 @@
                     <span class="text-secondary small"
                           th:if="${comment.createdAt != comment.updatedAt}">(수정됨)</span>
                 </div>
-                <form sec:authorize="isAuthenticated()" th:method="POST"
-                      th:action="@{/board/posts/{postId}/comments/{commentId}/delete(postId=${post.id}, commentId=${comment.id})}"
-                      onsubmit="return confirm('댓글을 삭제하시겠습니까?')">
-                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-                    <button type="submit" class="btn btn-sm btn-link text-secondary p-0">삭제</button>
-                </form>
+
+                <div class="d-flex gap-2" th:id="'comment-actions-' + ${comment.id}">
+                    <button type="button" th:if="${comment.canEdit}"
+                            class="btn btn-sm btn-link text-secondary p-0"
+                            th:attr="data-comment-id=${comment.id}"
+                            onclick="startCommentEdit(this.dataset.commentId)">수정</button>
+                    <form th:if="${comment.canDelete}" th:method="POST"
+                          th:action="@{/board/posts/{postId}/comments/{commentId}/delete(postId=${post.id}, commentId=${comment.id})}"
+                          onsubmit="return confirm('댓글을 삭제하시겠습니까?')">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-sm btn-link text-secondary p-0">삭제</button>
+                    </form>
+                </div>
             </div>
-            <p class="post-content mb-0 mt-1" th:text="${comment.content}"></p>
+
+            <!-- 보기 모드 -->
+            <p class="post-content mb-0 mt-1"
+               th:id="'comment-view-' + ${comment.id}"
+               th:text="${comment.content}"></p>
+
+            <!-- 편집 모드 -->
+            <form th:if="${comment.canEdit}" class="mt-2 d-none"
+                  th:id="'comment-edit-' + ${comment.id}"
+                  th:method="POST"
+                  th:action="@{/board/posts/{postId}/comments/{commentId}/edit(postId=${post.id}, commentId=${comment.id})}">
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                <textarea name="content" class="form-control form-control-sm mb-2" rows="3"
+                          th:text="${comment.content}"></textarea>
+                <button type="submit" class="btn btn-primary btn-sm">저장</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm"
+                        th:attr="data-comment-id=${comment.id}"
+                        onclick="cancelCommentEdit(this.dataset.commentId)">취소</button>
+            </form>
         </div>
 
         <!-- 댓글 작성 -->
@@ -82,5 +107,27 @@
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+  function startCommentEdit(id) {
+    document.getElementById('comment-view-' + id).classList.add('d-none');
+    document.getElementById('comment-actions-' + id).classList.add('d-none');
+    var form = document.getElementById('comment-edit-' + id);
+    form.classList.remove('d-none');
+    form.querySelector('textarea').focus();
+  }
+
+  function cancelCommentEdit(id) {
+    var form = document.getElementById('comment-edit-' + id);
+    form.classList.add('d-none');
+    form.querySelector('textarea').value = form.dataset.original;
+    document.getElementById('comment-view-' + id).classList.remove('d-none');
+    document.getElementById('comment-actions-' + id).classList.remove('d-none');
+  }
+
+  // 취소했을 때 되돌릴 원본을 각 폼에 기억시켜 둔다
+  document.querySelectorAll('form[id^="comment-edit-"]').forEach(function (form) {
+    form.dataset.original = form.querySelector('textarea').value;
+  });
+</script>
 </body>
 </html>

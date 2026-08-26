@@ -25,20 +25,26 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostResponse> getPosts(Pageable pageable) {
+    public Page<PostResponse> getPosts(Pageable pageable, String email) {
         Page<Post> posts = postRepository.findActivePosts(PostStatus.ACTIVE, pageable);
+
+        Member member = email == null ? null : getMember(email);
+
         return posts.map(post -> {
             long commentCount = commentRepository.countByPostIdAndStatus(post.getId(), CommentStatus.ACTIVE);
-            return PostResponse.from(post, commentCount);
+            return PostResponse.from(post, commentCount, member);
         });
     }
 
     @Transactional(readOnly = true)
-    public PostResponse getPost(Long postId) {
+    public PostResponse getPost(Long postId, String email) {
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
         long commentCount = commentRepository.countByPostIdAndStatus(postId, CommentStatus.ACTIVE);
-        return PostResponse.from(post, commentCount);
+
+        Member member = email == null ? null : getMember(email);
+
+        return PostResponse.from(post, commentCount, member);
     }
 
     @Transactional

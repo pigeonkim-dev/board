@@ -24,11 +24,13 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentResponse> getComments(Long postId) {
+    public List<CommentResponse> getComments(Long postId, String email) {
 
         List<Comment> commentList = commentRepository.findActiveCommentsByPostId(postId, CommentStatus.ACTIVE);
 
-        return commentList.stream().map(CommentResponse::from).toList();
+        Member member = email == null ? null : getMember(email);
+
+        return commentList.stream().map((c) -> CommentResponse.from(c, member)).toList();
     }
 
     @Transactional

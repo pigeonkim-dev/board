@@ -50,6 +50,11 @@ public class Comment extends BaseEntity {
     }
 
     public boolean isAuthor(Member member) {
+
+        if (member == null) {
+            return false;
+        }
+
         return this.author.getId().equals(member.getId());
     }
 }
