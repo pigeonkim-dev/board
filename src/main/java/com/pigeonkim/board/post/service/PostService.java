@@ -1,5 +1,6 @@
 package com.pigeonkim.board.post.service;
 
+import com.pigeonkim.board.common.exception.ForbiddenException;
 import com.pigeonkim.board.common.exception.NotFoundException;
 import com.pigeonkim.board.post.domain.*;
 import com.pigeonkim.board.post.dto.PostRequest;
@@ -22,7 +23,7 @@ public class PostService {
 
     private Member getMember(String email) {
         return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
     }
 
     @Transactional(readOnly = true)
@@ -69,12 +70,12 @@ public class PostService {
     public void updatePost(String email, Long postId, PostRequest request) {
 
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 게시글입니다."));
 
         Member author = getMember(email);
 
         if (!post.isAuthor(author)) {
-            throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
+            throw new ForbiddenException("작성자만 수정할 수 있습니다.");
         }
 
         post.update(request.getTitle(), request.getContent(), request.isCommentsEnabled());
@@ -84,12 +85,12 @@ public class PostService {
     public void deletePost(String email, Long postId) {
 
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 게시글입니다."));
 
         Member author = getMember(email);
 
         if (!post.isAuthor(author)) {
-            throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
+            throw new ForbiddenException("작성자만 삭제할 수 있습니다.");
         }
 
         post.delete();

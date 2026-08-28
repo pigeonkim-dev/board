@@ -1,5 +1,7 @@
 package com.pigeonkim.board.post.service;
 
+import com.pigeonkim.board.common.exception.ForbiddenException;
+import com.pigeonkim.board.common.exception.NotFoundException;
 import com.pigeonkim.board.post.domain.Post;
 import com.pigeonkim.board.post.domain.PostRepository;
 import com.pigeonkim.board.post.domain.PostStatus;
@@ -66,7 +68,7 @@ class PostServiceTest {
     void createPost_회원없음_예외() {
         given(memberRepository.findByEmail("test@test.com")).willReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NotFoundException.class,
                 () -> postService.createPost("test@test.com", postRequest()));
     }
 
@@ -106,7 +108,7 @@ class PostServiceTest {
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
         given(memberRepository.findByEmail(other.getEmail())).willReturn(Optional.of(other));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ForbiddenException.class,
                 () -> postService.updatePost(other.getEmail(), 1L, postRequest()));
     }
 
@@ -146,7 +148,7 @@ class PostServiceTest {
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
         given(memberRepository.findByEmail(other.getEmail())).willReturn(Optional.of(other));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ForbiddenException.class,
                 () -> postService.deletePost(other.getEmail(), 1L));
     }
 }
