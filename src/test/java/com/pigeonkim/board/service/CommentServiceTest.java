@@ -2,6 +2,8 @@ package com.pigeonkim.board.service;
 
 import com.pigeonkim.board.domain.*;
 import com.pigeonkim.board.domain.entity.*;
+import com.pigeonkim.board.exception.ConflictStateException;
+import com.pigeonkim.board.exception.ForbiddenException;
 import com.pigeonkim.board.repository.*;
 import com.pigeonkim.board.web.dto.CommentRequest;
 import com.pigeonkim.board.domain.entity.Member;
@@ -85,7 +87,7 @@ public class CommentServiceTest {
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("코멘트");
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ConflictStateException.class,
                 () -> commentService.createComment(member.getEmail(), post.getId(), commentRequest));
     }
 
@@ -131,7 +133,7 @@ public class CommentServiceTest {
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("코멘트");
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ForbiddenException.class,
                 () -> commentService.updateComment(other.getEmail(), post.getId(), comment.getId(), commentRequest));
     }
 

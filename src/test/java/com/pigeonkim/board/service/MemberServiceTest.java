@@ -1,6 +1,7 @@
 package com.pigeonkim.board.service;
 
 import com.pigeonkim.board.domain.entity.Member;
+import com.pigeonkim.board.exception.DuplicateException;
 import com.pigeonkim.board.repository.MemberRepository;
 import com.pigeonkim.board.web.dto.SignupRequest;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,7 @@ public class MemberServiceTest {
         given(memberRepository.findByEmail(request.getEmail())).willReturn(Optional.of(mock(Member.class)));
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> memberService.signup(request));
+        assertThrows(DuplicateException.class, () -> memberService.signup(request));
     }
 
     @Test
@@ -61,7 +62,7 @@ public class MemberServiceTest {
         given(memberRepository.existsByNickname(request.getNickname())).willReturn(true);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> memberService.signup(request));
+        assertThrows(DuplicateException.class, () -> memberService.signup(request));
     }
 
 }

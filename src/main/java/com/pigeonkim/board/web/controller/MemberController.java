@@ -1,6 +1,7 @@
 package com.pigeonkim.board.web.controller;
 
 
+import com.pigeonkim.board.exception.DuplicateException;
 import com.pigeonkim.board.web.dto.SignupRequest;
 import com.pigeonkim.board.service.MemberService;
 import jakarta.validation.Valid;
@@ -32,10 +33,18 @@ public class MemberController {
     @PostMapping("/member/signup")
     public String signup(@Valid @ModelAttribute SignupRequest signupRequest,
                          BindingResult bindingResult) {
+        
         if (bindingResult.hasErrors()) {
             return "member/signup";
         }
-        memberService.signup(signupRequest);
+
+        try {
+            memberService.signup(signupRequest);
+        } catch (DuplicateException e) {
+            bindingResult.reject("duplicate", e.getMessage());
+            return "member/signup";
+        }
+
         return "redirect:/member/login";
     }
 }

@@ -10,12 +10,6 @@ import org.springframework.web.servlet.ModelAndView;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public String handleIllegalArgument(IllegalArgumentException e, Model model) {
-        model.addAttribute("errorMessage", e.getMessage());
-        return "error/business";
-    }
-
     @ExceptionHandler(BusinessException.class)
     public ModelAndView handleBusinessException(BusinessException e) {
 

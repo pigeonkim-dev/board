@@ -2,6 +2,9 @@ package com.pigeonkim.board.service;
 
 import com.pigeonkim.board.domain.*;
 import com.pigeonkim.board.domain.entity.*;
+import com.pigeonkim.board.exception.ConflictStateException;
+import com.pigeonkim.board.exception.ForbiddenException;
+import com.pigeonkim.board.exception.NotFoundException;
 import com.pigeonkim.board.repository.*;
 import com.pigeonkim.board.web.dto.CommentRequest;
 import com.pigeonkim.board.web.dto.CommentResponse;
@@ -22,7 +25,7 @@ public class CommentService {
 
     private Member getMember(String email) {
         return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
     }
 
     @Transactional(readOnly = true)
@@ -40,11 +43,11 @@ public class CommentService {
 
         // 1. 게시글 존재 확인
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new ConflictStateException("존재하지 않는 게시글입니다."));
 
         // 2. 댓글 허용 여부
         if (!post.isCommentsEnabled()) {
-            throw new IllegalArgumentException("이 게시글은 댓글을 받지 않습니다.");
+            throw new ConflictStateException("이 게시글은 댓글을 받지 않습니다.");
         }
 
         // 3. 회원 확인
@@ -62,26 +65,26 @@ public class CommentService {
     @Transactional
     public void updateComment(String email, Long postId, Long commentId, CommentRequest request) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
 
         if (comment.getStatus() == CommentStatus.DELETED) {
-            throw new IllegalArgumentException("삭제된 댓글입니다.");
+            throw new ConflictStateException("삭제된 댓글입니다.");
         }
 
         // postId 정합성 검증
         if (!comment.getPost().getId().equals(postId)) {
-            throw new IllegalArgumentException("게시글과 댓글이 일치하지 않습니다.");
+            throw new NotFoundException("게시글과 댓글이 일치하지 않습니다.");
         }
 
         Member author = getMember(email);
 
         if (!comment.isAuthor(author)) {
-            throw new IllegalArgumentException("작성자가 아닙니다.");
+            throw new ForbiddenException("작성자가 아닙니다.");
         }
 
         // 삭제된 게시글 체크
         if (comment.getPost().getStatus() == PostStatus.DELETED) {
-            throw new IllegalArgumentException("삭제된 게시글의 댓글은 수정할 수 없습니다.");
+            throw new ConflictStateException("삭제된 게시글의 댓글은 수정할 수 없습니다.");
         }
 
         comment.update(request.getContent());
@@ -90,20 +93,20 @@ public class CommentService {
     @Transactional
     public void deleteComment(String email, Long postId, Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
 
         if (!comment.getPost().getId().equals(postId)) {
-            throw new IllegalArgumentException("게시글과 댓글이 일치하지 않습니다.");
+            throw new NotFoundException("게시글과 댓글이 일치하지 않습니다.");
         }
 
         if (comment.getPost().getStatus() == PostStatus.DELETED) {
-            throw new IllegalArgumentException("삭제된 게시글의 댓글은 삭제할 수 없습니다.");
+            throw new ConflictStateException("삭제된 게시글의 댓글은 삭제할 수 없습니다.");
         }
 
         Member author = getMember(email);
 
         if (!comment.isAuthor(author)) {
-            throw new IllegalArgumentException("작성자가 아닙니다.");
+            throw new ForbiddenException("작성자가 아닙니다.");
         }
 
         comment.delete();
