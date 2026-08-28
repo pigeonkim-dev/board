@@ -1,5 +1,6 @@
 package com.pigeonkim.board.post.service;
 
+import com.pigeonkim.board.common.exception.NotFoundException;
 import com.pigeonkim.board.post.domain.*;
 import com.pigeonkim.board.post.dto.PostRequest;
 import com.pigeonkim.board.post.dto.PostResponse;
@@ -39,7 +40,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostResponse getPost(Long postId, String email) {
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 게시글입니다."));
         long commentCount = commentRepository.countByPostIdAndStatus(postId, CommentStatus.ACTIVE);
 
         Member member = email == null ? null : getMember(email);

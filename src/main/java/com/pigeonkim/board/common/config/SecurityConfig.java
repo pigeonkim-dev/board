@@ -32,6 +32,8 @@ public class SecurityConfig {
                         // 2. 게시글 목록/상세 — 비로그인 허용 (숫자 ID만 매칭)
                         .requestMatchers(HttpMethod.GET, "/board/posts").permitAll()
                         .requestMatchers(HttpMethod.GET, "/board/posts/{id:\\d+}").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/.well-known/**").permitAll()
 
                         // 3. 관리자 전용
                         .requestMatchers("/admin/**").hasRole("ADMIN")
