@@ -1,5 +1,6 @@
 package com.pigeonkim.board.service;
 
+import com.pigeonkim.board.component.MemberFinder;
 import com.pigeonkim.board.domain.*;
 import com.pigeonkim.board.domain.entity.*;
 import com.pigeonkim.board.exception.ConflictStateException;
@@ -33,7 +34,7 @@ public class CommentServiceTest {
     private PostRepository postRepository;
 
     @Mock
-    private MemberRepository memberRepository;
+    private MemberFinder memberFinder;
 
     @InjectMocks
     private CommentService commentService;
@@ -69,7 +70,7 @@ public class CommentServiceTest {
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("코멘트");
 
-        given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));
+        given(memberFinder.getByEmail(member.getEmail())).willReturn(member);
         given(postRepository.findActiveById(post.getId(), PostStatus.ACTIVE)).willReturn(Optional.of(post));
 
         commentService.createComment(member.getEmail(), post.getId(), commentRequest);
@@ -104,7 +105,7 @@ public class CommentServiceTest {
         ReflectionTestUtils.setField(comment, "id", 1L);
 
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
-        given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));
+        given(memberFinder.getByEmail(member.getEmail())).willReturn(member);
 
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("새 내용");
@@ -128,7 +129,7 @@ public class CommentServiceTest {
         ReflectionTestUtils.setField(comment, "id", 1L);
 
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
-        given(memberRepository.findByEmail(other.getEmail())).willReturn(Optional.of(other));
+        given(memberFinder.getByEmail(other.getEmail())).willReturn(other);
 
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("코멘트");
@@ -150,7 +151,7 @@ public class CommentServiceTest {
         ReflectionTestUtils.setField(comment, "id", 1L);
 
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
-        given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));
+        given(memberFinder.getByEmail(member.getEmail())).willReturn(member);
 
         commentService.deleteComment(member.getEmail(), post.getId(), comment.getId());
 

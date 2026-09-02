@@ -1,5 +1,6 @@
 package com.pigeonkim.board.service;
 
+import com.pigeonkim.board.component.MemberFinder;
 import com.pigeonkim.board.exception.ForbiddenException;
 import com.pigeonkim.board.exception.NotFoundException;
 import com.pigeonkim.board.domain.entity.Post;
@@ -29,7 +30,7 @@ class PostServiceTest {
     private PostRepository postRepository;
 
     @Mock
-    private MemberRepository memberRepository;
+    private MemberFinder memberFinder;
 
     @InjectMocks
     private PostService postService;
@@ -57,7 +58,7 @@ class PostServiceTest {
     @Test
     void createPost_성공() {
         Member member = member("test@test.com", 1L, "racoon");
-        given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));
+        given(memberFinder.getByEmail(member.getEmail())).willReturn(member);
 
         postService.createPost(member.getEmail(), postRequest());
 
@@ -66,7 +67,8 @@ class PostServiceTest {
 
     @Test
     void createPost_회원없음_예외() {
-        given(memberRepository.findByEmail("test@test.com")).willReturn(Optional.empty());
+
+        given(memberFinder.getByEmail("test@test.com")).willThrow(new NotFoundException("not found"));
 
         assertThrows(NotFoundException.class,
                 () -> postService.createPost("test@test.com", postRequest()));
@@ -84,7 +86,7 @@ class PostServiceTest {
                 .build();
 
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));
+        given(memberFinder.getByEmail(member.getEmail())).willReturn(member);
 
         postService.updatePost(member.getEmail(), 1L, postRequest());
 
@@ -106,7 +108,7 @@ class PostServiceTest {
                 .build();
 
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        given(memberRepository.findByEmail(other.getEmail())).willReturn(Optional.of(other));
+        given(memberFinder.getByEmail(other.getEmail())).willReturn(other);
 
         assertThrows(ForbiddenException.class,
                 () -> postService.updatePost(other.getEmail(), 1L, postRequest()));
@@ -125,7 +127,7 @@ class PostServiceTest {
         ReflectionTestUtils.setField(post, "id", 1L);
 
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));
+        given(memberFinder.getByEmail(member.getEmail())).willReturn(member);
 
         postService.deletePost(member.getEmail(), post.getId());
 
@@ -146,7 +148,7 @@ class PostServiceTest {
         ReflectionTestUtils.setField(post, "id", 1L);
 
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        given(memberRepository.findByEmail(other.getEmail())).willReturn(Optional.of(other));
+        given(memberFinder.getByEmail(other.getEmail())).willReturn(other);
 
         assertThrows(ForbiddenException.class,
                 () -> postService.deletePost(other.getEmail(), 1L));

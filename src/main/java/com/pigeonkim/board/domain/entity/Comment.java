@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "comments")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Comment extends BaseEntity {
+public class Comment extends BaseEntity implements Authored {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,14 +49,5 @@ public class Comment extends BaseEntity {
 
     public void delete() {
         this.status = CommentStatus.DELETED;
-    }
-
-    public boolean isAuthor(Member member) {
-
-        if (member == null) {
-            return false;
-        }
-
-        return this.author.getId().equals(member.getId());
     }
 }

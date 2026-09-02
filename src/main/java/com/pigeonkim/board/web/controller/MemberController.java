@@ -33,7 +33,7 @@ public class MemberController {
     @PostMapping("/member/signup")
     public String signup(@Valid @ModelAttribute SignupRequest signupRequest,
                          BindingResult bindingResult) {
-        
+
         if (bindingResult.hasErrors()) {
             return "member/signup";
         }

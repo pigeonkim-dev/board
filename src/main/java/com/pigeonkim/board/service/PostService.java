@@ -1,5 +1,6 @@
 package com.pigeonkim.board.service;
 
+import com.pigeonkim.board.component.MemberFinder;
 import com.pigeonkim.board.exception.ForbiddenException;
 import com.pigeonkim.board.exception.NotFoundException;
 import com.pigeonkim.board.domain.*;
@@ -20,19 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final MemberRepository memberRepository;
     private final CommentRepository commentRepository;
-
-    private Member getMember(String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
-    }
+    private final MemberFinder memberFinder;
 
     @Transactional(readOnly = true)
     public Page<PostResponse> getPosts(Pageable pageable, String email) {
         Page<Post> posts = postRepository.findActivePosts(PostStatus.ACTIVE, pageable);
 
-        Member member = email == null ? null : getMember(email);
+        Member member = email == null ? null : memberFinder.getByEmail(email);
 
         return posts.map(post -> {
             long commentCount = commentRepository.countByPostIdAndStatus(post.getId(), CommentStatus.ACTIVE);
@@ -46,7 +42,7 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 게시글입니다."));
         long commentCount = commentRepository.countByPostIdAndStatus(postId, CommentStatus.ACTIVE);
 
-        Member member = email == null ? null : getMember(email);
+        Member member = email == null ? null : memberFinder.getByEmail(email);
 
         return PostResponse.from(post, commentCount, member);
     }
@@ -54,7 +50,7 @@ public class PostService {
     @Transactional
     public Long createPost(String email, PostRequest request) {
 
-        Member author = getMember(email);
+        Member author = memberFinder.getByEmail(email);
 
         Post post = Post.builder()
                 .author(author)
@@ -74,7 +70,7 @@ public class PostService {
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 게시글입니다."));
 
-        Member author = getMember(email);
+        Member author = memberFinder.getByEmail(email);
 
         if (!post.isAuthor(author)) {
             throw new ForbiddenException("작성자만 수정할 수 있습니다.");
@@ -89,7 +85,7 @@ public class PostService {
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 게시글입니다."));
 
-        Member author = getMember(email);
+        Member author = memberFinder.getByEmail(email);
 
         if (!post.isAuthor(author)) {
             throw new ForbiddenException("작성자만 삭제할 수 있습니다.");

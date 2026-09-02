@@ -1,5 +1,6 @@
 package com.pigeonkim.board.service;
 
+import com.pigeonkim.board.component.MemberFinder;
 import com.pigeonkim.board.domain.*;
 import com.pigeonkim.board.domain.entity.*;
 import com.pigeonkim.board.exception.ConflictStateException;
@@ -21,19 +22,14 @@ import java.util.List;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
-    private final MemberRepository memberRepository;
-
-    private Member getMember(String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
-    }
+    private final MemberFinder memberFinder;
 
     @Transactional(readOnly = true)
     public List<CommentResponse> getComments(Long postId, String email) {
 
         List<Comment> commentList = commentRepository.findActiveCommentsByPostId(postId, CommentStatus.ACTIVE);
 
-        Member member = email == null ? null : getMember(email);
+        Member member = email == null ? null : memberFinder.getByEmail(email);
 
         return commentList.stream().map((c) -> CommentResponse.from(c, member)).toList();
     }
@@ -51,7 +47,7 @@ public class CommentService {
         }
 
         // 3. 회원 확인
-        Member author = getMember(email);
+        Member author = memberFinder.getByEmail(email);
 
         Comment comment = Comment.builder()
                 .post(post)
@@ -76,7 +72,7 @@ public class CommentService {
             throw new NotFoundException("게시글과 댓글이 일치하지 않습니다.");
         }
 
-        Member author = getMember(email);
+        Member author = memberFinder.getByEmail(email);
 
         if (!comment.isAuthor(author)) {
             throw new ForbiddenException("작성자가 아닙니다.");
@@ -103,7 +99,7 @@ public class CommentService {
             throw new ConflictStateException("삭제된 게시글의 댓글은 삭제할 수 없습니다.");
         }
 
-        Member author = getMember(email);
+        Member author = memberFinder.getByEmail(email);
 
         if (!comment.isAuthor(author)) {
             throw new ForbiddenException("작성자가 아닙니다.");
