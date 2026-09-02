@@ -11,6 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -21,6 +22,7 @@ public class CommentController {
 
     @PostMapping("/board/posts/{postId}/comments")
     public String create(@PathVariable Long postId,
+                         @RequestParam(defaultValue = "0") int page,
                          @Valid @ModelAttribute CommentRequest request,
                          BindingResult bindingResult,
                          @AuthenticationPrincipal CustomUserDetails user,
@@ -33,11 +35,14 @@ public class CommentController {
                     : "입력값을 확인해주세요.";
 
             redirectAttributes.addFlashAttribute("commentError", errorMessage);
+            redirectAttributes.addAttribute("page", page);
 
             return "redirect:/board/posts/" + postId;
         }
 
         commentService.createComment(user.getEmail(), postId, request);
+
+        redirectAttributes.addAttribute("page", page);
 
         return "redirect:/board/posts/" + postId;
     }
@@ -45,6 +50,7 @@ public class CommentController {
     @PostMapping("/board/posts/{postId}/comments/{commentId}/edit")
     public String update(@PathVariable Long postId,
                          @PathVariable Long commentId,
+                         @RequestParam(defaultValue = "0") int page,
                          @Valid @ModelAttribute CommentRequest request,
                          BindingResult bindingResult,
                          @AuthenticationPrincipal CustomUserDetails user,
@@ -57,11 +63,13 @@ public class CommentController {
                     : "입력값을 확인해주세요.";
 
             redirectAttributes.addFlashAttribute("commentError", errorMessage);
+            redirectAttributes.addAttribute("page", page);
 
             return "redirect:/board/posts/" + postId;
         }
 
         commentService.updateComment(user.getEmail(), postId, commentId, request);
+        redirectAttributes.addAttribute("page", page);
 
         return "redirect:/board/posts/" + postId;
     }
@@ -69,9 +77,12 @@ public class CommentController {
     @PostMapping("/board/posts/{postId}/comments/{commentId}/delete")
     public String delete(@PathVariable Long postId,
                          @PathVariable Long commentId,
-                         @AuthenticationPrincipal CustomUserDetails user) {
+                         @RequestParam(defaultValue = "0") int page,
+                         @AuthenticationPrincipal CustomUserDetails user,
+                         RedirectAttributes redirectAttributes) {
 
         commentService.deleteComment(user.getEmail(), postId, commentId);
+        redirectAttributes.addAttribute("page", page);
 
         return "redirect:/board/posts/" + postId;
     }

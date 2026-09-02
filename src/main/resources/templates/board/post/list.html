@@ -27,7 +27,7 @@
                 <td class="text-secondary" th:text="${post.id}"></td>
                 <td>
                     <a class="text-decoration-none fw-semibold"
-                       th:href="@{/board/posts/{id}(id=${post.id})}" th:text="${post.title}"></a>
+                       th:href="@{/board/posts/{id}(id=${post.id}, page=${posts.number})}" th:text="${post.title}"></a>
                 </td>
                 <td class="text-center">
                     <span class="badge text-bg-light" th:text="${post.commentCount}"></span>

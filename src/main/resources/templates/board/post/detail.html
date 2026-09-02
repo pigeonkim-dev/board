@@ -18,13 +18,14 @@
     </div>
 
     <div class="d-flex gap-2 mb-4">
-        <a class="btn btn-outline-secondary" th:href="@{/board/posts}">목록</a>
+        <a class="btn btn-outline-secondary" th:href="@{/board/posts(page=${page})}">목록</a>
         <a class="btn btn-outline-primary" th:if="${post.canEdit}"
-           th:href="@{/board/posts/{id}/edit(id=${post.id})}">수정</a>
+           th:href="@{/board/posts/{id}/edit(id=${post.id}, page=${page})}">수정</a>
         <form th:if="${post.canDelete}" th:method="POST"
               th:action="@{/board/posts/{id}/delete(id=${post.id})}"
               onsubmit="return confirm('삭제하시겠습니까?')">
             <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+            <input type="hidden" name="page" th:value="${page}"/>
             <button type="submit" class="btn btn-outline-danger">삭제</button>
         </form>
     </div>
@@ -56,6 +57,7 @@
                           th:action="@{/board/posts/{postId}/comments/{commentId}/delete(postId=${post.id}, commentId=${comment.id})}"
                           onsubmit="return confirm('댓글을 삭제하시겠습니까?')">
                         <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                        <input type="hidden" name="page" th:value="${page}"/>
                         <button type="submit" class="btn btn-sm btn-link text-secondary p-0">삭제</button>
                     </form>
                 </div>
@@ -72,6 +74,7 @@
                   th:method="POST"
                   th:action="@{/board/posts/{postId}/comments/{commentId}/edit(postId=${post.id}, commentId=${comment.id})}">
                 <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                <input type="hidden" name="page" th:value="${page}"/>
                 <textarea name="content" class="form-control form-control-sm mb-2" rows="3"
                           th:text="${comment.content}"></textarea>
                 <button type="submit" class="btn btn-primary btn-sm">저장</button>
@@ -86,6 +89,7 @@
               th:action="@{/board/posts/{postId}/comments(postId=${post.id})}"
               th:object="${commentRequest}">
             <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+            <input type="hidden" name="page" th:value="${page}"/>
             <div class="mb-2">
                 <label for="commentContent" class="form-label visually-hidden">댓글</label>
                 <textarea id="commentContent" class="form-control" th:field="*{content}"

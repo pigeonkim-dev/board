@@ -15,11 +15,9 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -43,6 +41,7 @@ public class PostController {
 
     @GetMapping("/board/posts/{id}")
     public String detail(@PathVariable Long id,
+                         @RequestParam(defaultValue = "0") int page,
                          Model model,
                          @AuthenticationPrincipal CustomUserDetails user) {
 
@@ -51,6 +50,7 @@ public class PostController {
         PostResponse post = postService.getPost(id, email);
         List<CommentResponse> comments = commentService.getComments(id, email);
 
+        model.addAttribute("page", page);
         model.addAttribute("post", post);
         model.addAttribute("comments", comments);
         model.addAttribute("commentRequest", new CommentRequest());
@@ -74,40 +74,51 @@ public class PostController {
 
     @GetMapping("/board/posts/{id}/edit")
     public String editForm(@PathVariable Long id,
+                           @RequestParam(defaultValue = "0") int page,
                            Model model,
                            @AuthenticationPrincipal CustomUserDetails user) {
 
         String email = user != null ? user.getUsername() : null;
 
         PostResponse post = postService.getPost(id, email);
+        model.addAttribute("page", page);
         model.addAttribute("post", post);
         return "board/post/edit";
     }
 
     @PostMapping("/board/posts/{id}/edit")
     public String edit(@PathVariable Long id,
+                       @RequestParam(defaultValue = "0") int page,
                        @Valid @ModelAttribute PostRequest request,
                        BindingResult bindingResult,
                        @AuthenticationPrincipal CustomUserDetails user,
+                       RedirectAttributes redirectAttributes,
                        Model model) {
 
         if (bindingResult.hasErrors()) {
             String email = user != null ? user.getUsername() : null;
 
             PostResponse post = postService.getPost(id, email);
+            model.addAttribute("page", page);
             model.addAttribute("post", post);
             return "board/post/edit";
         }
 
         postService.updatePost(user.getEmail(), id, request);
+        redirectAttributes.addAttribute("page", page);
         return "redirect:/board/posts/" + id;
     }
 
     @PostMapping("/board/posts/{id}/delete")
     public String delete(@PathVariable Long id,
-                         @AuthenticationPrincipal CustomUserDetails user) {
+                         @RequestParam(defaultValue = "0") int page,
+                         @AuthenticationPrincipal CustomUserDetails user,
+                         RedirectAttributes redirectAttributes) {
 
         postService.deletePost(user.getEmail(), id);
+
+        redirectAttributes.addAttribute("page", page);
+
         return "redirect:/board/posts";
     }
 
