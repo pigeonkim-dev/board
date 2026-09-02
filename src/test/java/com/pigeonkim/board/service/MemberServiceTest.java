@@ -1,8 +1,10 @@
 package com.pigeonkim.board.service;
 
 import com.pigeonkim.board.domain.entity.Member;
+import com.pigeonkim.board.domain.entity.Profile;
 import com.pigeonkim.board.exception.DuplicateException;
 import com.pigeonkim.board.repository.MemberRepository;
+import com.pigeonkim.board.repository.ProfileRepository;
 import com.pigeonkim.board.web.dto.SignupRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +28,9 @@ public class MemberServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private ProfileRepository profileRepository;
+
     @InjectMocks
     private MemberService memberService;
 
@@ -33,6 +38,7 @@ public class MemberServiceTest {
     public void signup_성공() {
         // given
         SignupRequest request = new SignupRequest("test@test.com", "1234", "라쿤");
+
         given(memberRepository.findByEmail(request.getEmail())).willReturn(Optional.empty());
         given(memberRepository.existsByNickname(request.getNickname())).willReturn(false);
         given(passwordEncoder.encode(request.getPassword())).willReturn("encodedPassword");
@@ -42,6 +48,7 @@ public class MemberServiceTest {
 
         // then
         verify(memberRepository, times(1)).save(any(Member.class));
+        verify(profileRepository, times(1)).save(any(Profile.class));
     }
 
     @Test

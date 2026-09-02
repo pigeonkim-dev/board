@@ -1,9 +1,11 @@
 package com.pigeonkim.board.service;
 
 import com.pigeonkim.board.domain.entity.Member;
+import com.pigeonkim.board.domain.entity.Profile;
 import com.pigeonkim.board.exception.DuplicateException;
 import com.pigeonkim.board.repository.MemberRepository;
 import com.pigeonkim.board.domain.MemberRole;
+import com.pigeonkim.board.repository.ProfileRepository;
 import com.pigeonkim.board.web.dto.SignupRequest;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ public class MemberService {
 
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
+    private final ProfileRepository profileRepository;
 
     @Transactional
     public void signup(SignupRequest request){
@@ -38,6 +41,13 @@ public class MemberService {
                 .build();
 
         memberRepository.save(member);
+
+        Profile profile = Profile.builder()
+                .member(member)
+                .nickname(request.getNickname())
+                .build();
+
+        profileRepository.save(profile);
 
     }
 }
