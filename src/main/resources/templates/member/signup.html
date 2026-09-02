@@ -36,14 +36,6 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="name" class="form-label">이름</label>
-                    <input type="text" id="name" class="form-control" th:field="*{name}"
-                           placeholder="이름"/>
-                    <div class="text-danger small mt-1"
-                         th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
-                </div>
-
-                <div class="mb-3">
                     <label for="nickname" class="form-label">닉네임</label>
                     <input type="text" id="nickname" class="form-control" th:field="*{nickname}"
                            placeholder="닉네임 (2~20자)"/>

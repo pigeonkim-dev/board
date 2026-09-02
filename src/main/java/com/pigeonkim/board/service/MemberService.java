@@ -33,7 +33,6 @@ public class MemberService {
         Member member = Member.builder()
                 .email(request.getEmail())
                 .password(encodedPassword)
-                .name(request.getName())
                 .nickname(request.getNickname())
                 .role(MemberRole.USER)
                 .build();
