@@ -39,7 +39,6 @@ class PostServiceTest {
         Member m = Member.builder()
                 .email(email)
                 .password("encoded")
-                .name("테스트")
                 .nickname(nickname)
                 .role(MemberRole.USER)
                 .build();

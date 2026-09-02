@@ -43,11 +43,11 @@ public class CommentServiceTest {
         Member m = Member.builder()
                 .email(email)
                 .password("encoded")
-                .name("테스트")
                 .nickname(nickname)
                 .role(MemberRole.USER)
                 .build();
         ReflectionTestUtils.setField(m, "id", id);
+
         return m;
     }
 
@@ -59,6 +59,7 @@ public class CommentServiceTest {
                 .content("content")
                 .build();
         ReflectionTestUtils.setField(post, "id", 1L);
+
         return post;
     }
 
