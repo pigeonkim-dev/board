@@ -40,7 +40,7 @@ public class MemberServiceTest {
         SignupRequest request = new SignupRequest("test@test.com", "1234", "라쿤");
 
         given(memberRepository.findByEmail(request.getEmail())).willReturn(Optional.empty());
-        given(memberRepository.existsByNickname(request.getNickname())).willReturn(false);
+        given(profileRepository.existsByNickname(request.getNickname())).willReturn(false);
         given(passwordEncoder.encode(request.getPassword())).willReturn("encodedPassword");
 
         // when
@@ -66,7 +66,7 @@ public class MemberServiceTest {
         // given
         SignupRequest request = new SignupRequest("test@test.com", "1234", "라쿤");
         given(memberRepository.findByEmail(request.getEmail())).willReturn(Optional.empty());
-        given(memberRepository.existsByNickname(request.getNickname())).willReturn(true);
+        given(profileRepository.existsByNickname(request.getNickname())).willReturn(true);
 
         // when & then
         assertThrows(DuplicateException.class, () -> memberService.signup(request));

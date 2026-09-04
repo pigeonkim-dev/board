@@ -27,7 +27,7 @@ public class MemberService {
             throw new DuplicateException("이미 사용중인 이메일입니다.");
         }
 
-        if (memberRepository.existsByNickname(request.getNickname())) {
+        if (profileRepository.existsByNickname(request.getNickname())) {
             throw new DuplicateException("이미 사용중인 닉네임입니다.");
         }
 
@@ -36,7 +36,6 @@ public class MemberService {
         Member member = Member.builder()
                 .email(request.getEmail())
                 .password(encodedPassword)
-                .nickname(request.getNickname())
                 .role(MemberRole.USER)
                 .build();
 
