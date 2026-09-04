@@ -1,6 +1,6 @@
 package com.pigeonkim.board.service;
 
-import com.pigeonkim.board.component.MemberFinder;
+import com.pigeonkim.board.component.ProfileFinder;
 import com.pigeonkim.board.domain.*;
 import com.pigeonkim.board.domain.entity.*;
 import com.pigeonkim.board.exception.ConflictStateException;
@@ -9,8 +9,6 @@ import com.pigeonkim.board.exception.NotFoundException;
 import com.pigeonkim.board.repository.*;
 import com.pigeonkim.board.web.dto.CommentRequest;
 import com.pigeonkim.board.web.dto.CommentResponse;
-import com.pigeonkim.board.domain.entity.Member;
-import com.pigeonkim.board.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,16 +20,16 @@ import java.util.List;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
-    private final MemberFinder memberFinder;
+    private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
     public List<CommentResponse> getComments(Long postId, String email) {
 
         List<Comment> commentList = commentRepository.findActiveCommentsByPostId(postId, CommentStatus.ACTIVE);
 
-        Member member = email == null ? null : memberFinder.getByEmail(email);
+        Profile profile = email == null ? null : profileFinder.findByMemberEmail(email);
 
-        return commentList.stream().map((c) -> CommentResponse.from(c, member)).toList();
+        return commentList.stream().map((c) -> CommentResponse.from(c, profile)).toList();
     }
 
     @Transactional
@@ -46,12 +44,11 @@ public class CommentService {
             throw new ConflictStateException("이 게시글은 댓글을 받지 않습니다.");
         }
 
-        // 3. 회원 확인
-        Member author = memberFinder.getByEmail(email);
+        Profile profile = profileFinder.findByMemberEmail(email);
 
         Comment comment = Comment.builder()
                 .post(post)
-                .author(author)
+                .author(profile)
                 .content(request.getContent())
                 .build();
 
@@ -72,9 +69,9 @@ public class CommentService {
             throw new NotFoundException("게시글과 댓글이 일치하지 않습니다.");
         }
 
-        Member author = memberFinder.getByEmail(email);
+        Profile profile = profileFinder.findByMemberEmail(email);
 
-        if (!comment.isAuthor(author)) {
+        if (!comment.isAuthor(profile)) {
             throw new ForbiddenException("작성자가 아닙니다.");
         }
 
@@ -99,9 +96,9 @@ public class CommentService {
             throw new ConflictStateException("삭제된 게시글의 댓글은 삭제할 수 없습니다.");
         }
 
-        Member author = memberFinder.getByEmail(email);
+        Profile profile = profileFinder.findByMemberEmail(email);
 
-        if (!comment.isAuthor(author)) {
+        if (!comment.isAuthor(profile)) {
             throw new ForbiddenException("작성자가 아닙니다.");
         }
 

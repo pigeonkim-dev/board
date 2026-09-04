@@ -1,6 +1,7 @@
 package com.pigeonkim.board.service;
 
-import com.pigeonkim.board.component.MemberFinder;
+import com.pigeonkim.board.component.ProfileFinder;
+import com.pigeonkim.board.domain.entity.Profile;
 import com.pigeonkim.board.exception.ForbiddenException;
 import com.pigeonkim.board.exception.NotFoundException;
 import com.pigeonkim.board.domain.entity.Post;
@@ -8,7 +9,6 @@ import com.pigeonkim.board.repository.PostRepository;
 import com.pigeonkim.board.domain.PostStatus;
 import com.pigeonkim.board.web.dto.PostRequest;
 import com.pigeonkim.board.domain.entity.Member;
-import com.pigeonkim.board.repository.MemberRepository;
 import com.pigeonkim.board.domain.MemberRole;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ class PostServiceTest {
     private PostRepository postRepository;
 
     @Mock
-    private MemberFinder memberFinder;
+    private ProfileFinder profileFinder;
 
     @InjectMocks
     private PostService postService;
@@ -57,7 +57,10 @@ class PostServiceTest {
     @Test
     void createPost_성공() {
         Member member = member("test@test.com", 1L, "racoon");
-        given(memberFinder.getByEmail(member.getEmail())).willReturn(member);
+
+        Profile profile = new Profile(member, "test");
+
+        given(profileFinder.findByMemberEmail(member.getEmail())).willReturn(profile);
 
         postService.createPost(member.getEmail(), postRequest());
 
@@ -67,7 +70,7 @@ class PostServiceTest {
     @Test
     void createPost_회원없음_예외() {
 
-        given(memberFinder.getByEmail("test@test.com")).willThrow(new NotFoundException("not found"));
+        given(profileFinder.findByMemberEmail("test@test.com")).willThrow(new NotFoundException("not found"));
 
         assertThrows(NotFoundException.class,
                 () -> postService.createPost("test@test.com", postRequest()));
@@ -77,15 +80,17 @@ class PostServiceTest {
     void updatePost_성공() {
         Member member = member("test@test.com", 1L, "racoon");
 
+        Profile profile = new Profile(member, "test");
+
         Post post = Post.builder()
                 .title("title123")
                 .content("content123")
-                .author(member)
+                .author(profile)
                 .commentsEnabled(false)
                 .build();
 
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        given(memberFinder.getByEmail(member.getEmail())).willReturn(member);
+        given(profileFinder.findByMemberEmail(member.getEmail())).willReturn(profile);
 
         postService.updatePost(member.getEmail(), 1L, postRequest());
 
@@ -99,15 +104,17 @@ class PostServiceTest {
         Member author = member("test@test.com", 1L, "racoon");
         Member other = member("test1@test.com", 2L, "racoon1");
 
+        Profile profile = new Profile(other, "test");
+
         Post post = Post.builder()
                 .title("title123")
                 .content("content123")
-                .author(author)
+                .author(profile)
                 .commentsEnabled(false)
                 .build();
 
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        given(memberFinder.getByEmail(other.getEmail())).willReturn(other);
+        given(profileFinder.findByMemberEmail(other.getEmail())).willReturn(profile);
 
         assertThrows(ForbiddenException.class,
                 () -> postService.updatePost(other.getEmail(), 1L, postRequest()));
@@ -117,16 +124,18 @@ class PostServiceTest {
     void deletePost_성공() {
         Member member = member("test@test.com", 1L, "racoon");
 
+        Profile profile = new Profile(member, "test");
+
         Post post = Post.builder()
                 .title("title123")
                 .content("content123")
-                .author(member)
+                .author(profile)
                 .commentsEnabled(false)
                 .build();
         ReflectionTestUtils.setField(post, "id", 1L);
 
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        given(memberFinder.getByEmail(member.getEmail())).willReturn(member);
+        given(profileFinder.findByMemberEmail(member.getEmail())).willReturn(profile);
 
         postService.deletePost(member.getEmail(), post.getId());
 
@@ -138,16 +147,18 @@ class PostServiceTest {
         Member author = member("test@test.com", 1L, "racoon");
         Member other = member("test1@test.com", 2L, "racoon1");
 
+        Profile profile = new Profile(other, "test");
+
         Post post = Post.builder()
                 .title("title123")
                 .content("content123")
-                .author(author)
+                .author(profile)
                 .commentsEnabled(false)
                 .build();
         ReflectionTestUtils.setField(post, "id", 1L);
 
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
-        given(memberFinder.getByEmail(other.getEmail())).willReturn(other);
+        given(profileFinder.findByMemberEmail(other.getEmail())).willReturn(profile);
 
         assertThrows(ForbiddenException.class,
                 () -> postService.deletePost(other.getEmail(), 1L));

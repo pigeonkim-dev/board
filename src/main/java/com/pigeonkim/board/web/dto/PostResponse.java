@@ -1,7 +1,7 @@
 package com.pigeonkim.board.web.dto;
 
-import com.pigeonkim.board.domain.entity.Member;
 import com.pigeonkim.board.domain.entity.Post;
+import com.pigeonkim.board.domain.entity.Profile;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -33,7 +33,7 @@ public class PostResponse {
         this.updatedAt = updatedAt;
     }
 
-    public static PostResponse from(Post post, long commentCount, Member member) {
+    public static PostResponse from(Post post, long commentCount, Profile profile) {
 
         PostResponse postResponse = new PostResponse(post.getId(),
                 post.getTitle(),
@@ -44,7 +44,7 @@ public class PostResponse {
                 post.getCreatedAt(),
                 post.getUpdatedAt());
 
-        if (post.isAuthor(member)) {
+        if (post.isAuthor(profile)) {
             postResponse.canDelete = true;
             postResponse.canEdit = true;
         }

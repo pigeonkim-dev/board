@@ -24,7 +24,7 @@ public class Post extends BaseEntity implements Authored {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
-    private Member author;
+    private Profile author;
 
     @Column(nullable = false)
     private String title;
@@ -40,7 +40,7 @@ public class Post extends BaseEntity implements Authored {
     private PostStatus status;
 
     @Builder
-    public Post(Member author, String title, String content, boolean commentsEnabled) {
+    public Post(Profile author, String title, String content, boolean commentsEnabled) {
         this.author = author;
         this.title = title;
         this.content = content;

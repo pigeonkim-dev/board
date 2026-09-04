@@ -8,14 +8,14 @@ package com.pigeonkim.board.domain.entity;
  */
 public interface Authored {
 
-    Member getAuthor();
+    Profile getAuthor();
 
-    default boolean isAuthor(Member member) {
+    default boolean isAuthor(Profile profile) {
 
-        if (member == null) {
+        if (profile == null) {
             return false;
         }
 
-        return getAuthor().getId().equals(member.getId());
+        return getAuthor().getId().equals(profile.getId());
     }
 }

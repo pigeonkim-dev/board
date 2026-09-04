@@ -1,6 +1,6 @@
 package com.pigeonkim.board.service;
 
-import com.pigeonkim.board.component.MemberFinder;
+import com.pigeonkim.board.component.ProfileFinder;
 import com.pigeonkim.board.domain.*;
 import com.pigeonkim.board.domain.entity.*;
 import com.pigeonkim.board.exception.ConflictStateException;
@@ -8,7 +8,6 @@ import com.pigeonkim.board.exception.ForbiddenException;
 import com.pigeonkim.board.repository.*;
 import com.pigeonkim.board.web.dto.CommentRequest;
 import com.pigeonkim.board.domain.entity.Member;
-import com.pigeonkim.board.repository.MemberRepository;
 import com.pigeonkim.board.domain.MemberRole;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +33,7 @@ public class CommentServiceTest {
     private PostRepository postRepository;
 
     @Mock
-    private MemberFinder memberFinder;
+    private ProfileFinder profileFinder;
 
     @InjectMocks
     private CommentService commentService;
@@ -51,10 +50,10 @@ public class CommentServiceTest {
         return m;
     }
 
-    private Post post(Member author, boolean commentsEnabled) {
+    private Post post(Profile profile, boolean commentsEnabled) {
         Post post = Post.builder()
                 .commentsEnabled(commentsEnabled)
-                .author(author)
+                .author(profile)
                 .title("title")
                 .content("content")
                 .build();
@@ -66,12 +65,14 @@ public class CommentServiceTest {
     @Test
     void createComment_성공() {
         Member member = member("test@test.com", 1L, "Raccoon");
-        Post post = post(member, true);
+
+        Profile profile = new Profile(member, "test");
+        Post post = post(profile, true);
 
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("코멘트");
 
-        given(memberFinder.getByEmail(member.getEmail())).willReturn(member);
+        given(profileFinder.findByMemberEmail(member.getEmail())).willReturn(profile);
         given(postRepository.findActiveById(post.getId(), PostStatus.ACTIVE)).willReturn(Optional.of(post));
 
         commentService.createComment(member.getEmail(), post.getId(), commentRequest);
@@ -82,7 +83,9 @@ public class CommentServiceTest {
     @Test
     void createComment_댓글비허용_예외() {
         Member member = member("test@test.com", 1L, "Raccoon");
-        Post post = post(member, false);
+
+        Profile profile = new Profile(member, "test");
+        Post post = post(profile, false);
 
         given(postRepository.findActiveById(post.getId(), PostStatus.ACTIVE)).willReturn(Optional.of(post));
 
@@ -96,17 +99,19 @@ public class CommentServiceTest {
     @Test
     void updateComment_성공() {
         Member member = member("test@test.com", 1L, "Raccoon");
-        Post post = post(member, false);
+
+        Profile profile = new Profile(member, "test");
+        Post post = post(profile, false);
 
         Comment comment = Comment.builder()
                 .content("기존 내용")
                 .post(post)
-                .author(member)
+                .author(profile)
                 .build();
         ReflectionTestUtils.setField(comment, "id", 1L);
 
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
-        given(memberFinder.getByEmail(member.getEmail())).willReturn(member);
+        given(profileFinder.findByMemberEmail(member.getEmail())).willReturn(profile);
 
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("새 내용");
@@ -120,17 +125,20 @@ public class CommentServiceTest {
     void updateComment_작성자아님_예외() {
         Member author = member("test@test.com", 1L, "Raccoon");
         Member other = member("other@test.com", 3L, "Fox");
-        Post post = post(author, false);
+
+        Profile profile = new Profile(author, "test");
+
+        Post post = post(profile, false);
 
         Comment comment = Comment.builder()
                 .content("기존 내용")
                 .post(post)
-                .author(author)
+                .author(profile)
                 .build();
         ReflectionTestUtils.setField(comment, "id", 1L);
 
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
-        given(memberFinder.getByEmail(other.getEmail())).willReturn(other);
+        given(profileFinder.findByMemberEmail(other.getEmail())).willReturn(profile);
 
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("코멘트");
@@ -142,17 +150,20 @@ public class CommentServiceTest {
     @Test
     void deleteComment_성공() {
         Member member = member("test@test.com", 1L, "Raccoon");
-        Post post = post(member, false);
+
+        Profile profile = new Profile(member, "test");
+
+        Post post = post(profile, false);
 
         Comment comment = Comment.builder()
                 .content("기존 내용")
                 .post(post)
-                .author(member)
+                .author(profile)
                 .build();
         ReflectionTestUtils.setField(comment, "id", 1L);
 
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
-        given(memberFinder.getByEmail(member.getEmail())).willReturn(member);
+        given(profileFinder.findByMemberEmail(member.getEmail())).willReturn(profile);
 
         commentService.deleteComment(member.getEmail(), post.getId(), comment.getId());
 

@@ -1,7 +1,7 @@
 package com.pigeonkim.board.web.dto;
 
-import com.pigeonkim.board.domain.entity.Member;
 import com.pigeonkim.board.domain.entity.Comment;
+import com.pigeonkim.board.domain.entity.Profile;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -25,7 +25,7 @@ public class CommentResponse {
         this.updatedAt = updatedAt;
     }
 
-    public static CommentResponse from(Comment comment, Member member) {
+    public static CommentResponse from(Comment comment, Profile profile) {
         CommentResponse commentResponse = new CommentResponse(
                 comment.getId(),
                 comment.getContent(),
@@ -34,7 +34,7 @@ public class CommentResponse {
                 comment.getUpdatedAt()
         );
 
-        if (comment.isAuthor(member)) {
+        if (comment.isAuthor(profile)) {
             commentResponse.canDelete = true;
             commentResponse.canEdit = true;
         }
