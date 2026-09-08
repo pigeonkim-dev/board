@@ -38,9 +38,9 @@
                     <a class="nav-link" th:href="@{/member/signup}">회원가입</a>
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <span class="navbar-text me-2">
+                    <a class="nav-link me-1" th:href="@{/me}">
                         <strong sec:authentication="principal.nickname">닉네임</strong>님
-                    </span>
+                    </a>
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     <form th:method="POST" th:action="@{/logout}" class="d-inline">

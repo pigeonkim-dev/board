@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('내 정보')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="app-card p-4">
+                <h1 class="h4 mb-4">내 정보</h1>
+
+                <dl class="row mb-0">
+                    <dt class="col-sm-3 text-secondary fw-normal">닉네임</dt>
+                    <dd class="col-sm-9" th:text="${profile.nickname}">닉네임</dd>
+                </dl>
+
+                <!-- 이미지 · 소개 · 현재 위치는 B0-9c 이후에 여기로 들어온다.
+                     dl 안에 dt/dd 한 쌍씩 더하면 된다. -->
+
+                <hr class="my-4"/>
+
+                <a class="btn btn-outline-secondary" th:href="@{/board/posts}">목록으로</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
