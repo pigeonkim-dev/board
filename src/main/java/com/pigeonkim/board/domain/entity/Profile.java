@@ -33,12 +33,16 @@ public class Profile extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String nickname;
 
+    @Column(nullable = true)
+    private String bio;
+
     @Builder
     public Profile(Member member, String nickname) {
         this.member = member;
         this.nickname = nickname;
     }
-    public void updateNickName(String nickname) {
+    public void updateProfile(String nickname,  String bio) {
         this.nickname = nickname;
+        this.bio = bio;
     }
 }

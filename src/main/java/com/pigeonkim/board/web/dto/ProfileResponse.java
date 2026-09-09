@@ -13,12 +13,16 @@ import lombok.Getter;
 public class ProfileResponse {
 
     private String nickname;
+    private String bio;
 
-    private ProfileResponse(String nickname){
+    private ProfileResponse(String nickname, String bio) {
         this.nickname = nickname;
+        this.bio = bio;
     }
 
     public static ProfileResponse from(Profile profile){
-        return new ProfileResponse(profile.getNickname());
+        return new ProfileResponse(profile.getNickname(),
+                profile.getBio()
+        );
     }
 }

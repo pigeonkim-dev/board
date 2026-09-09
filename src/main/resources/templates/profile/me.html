@@ -17,10 +17,18 @@
                 <dl class="row mb-0">
                     <dt class="col-sm-3 text-secondary fw-normal">닉네임</dt>
                     <dd class="col-sm-9" th:text="${profile.nickname}">닉네임</dd>
+
+                    <dt class="col-sm-3 text-secondary fw-normal">자기소개</dt>
+                    <dd class="col-sm-9 mb-0">
+                        <!-- 줄바꿈을 그대로 보여주려면 pre-wrap 이 필요하다.
+                             th:text 는 HTML 을 이스케이프하므로 <br> 로는 안 된다. -->
+                        <span th:if="${!#strings.isEmpty(profile.bio)}"
+                              th:text="${profile.bio}" style="white-space: pre-wrap;">소개</span>
+                        <span th:if="${#strings.isEmpty(profile.bio)}"
+                              class="text-secondary">아직 작성하지 않았습니다.</span>
+                    </dd>
                 </dl>
 
-                <!-- 이미지 · 소개 · 현재 위치는 B0-9c 이후에 여기로 들어온다.
-                     dl 안에 dt/dd 한 쌍씩 더하면 된다. -->
 
                 <hr class="my-4"/>
 

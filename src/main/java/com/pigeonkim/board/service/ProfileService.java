@@ -35,14 +35,12 @@ public class ProfileService {
 
         Profile profile = profileFinder.findByMemberEmail(email);
 
-        if (profile.getNickname().equals(profileUpdateRequest.getNickname())) {
-            return;
+        if (!profile.getNickname().equals(profileUpdateRequest.getNickname())) {
+            if (profileRepository.existsByNickname(profileUpdateRequest.getNickname())) {
+                throw new DuplicateException("이미 사용중인 닉네임 입니다.");
+            }
         }
 
-        if (profileRepository.existsByNickname(profileUpdateRequest.getNickname())) {
-            throw new DuplicateException("이미 사용중인 닉네임 입니다.");
-        }
-
-        profile.updateNickName(profileUpdateRequest.getNickname());
+        profile.updateProfile(profileUpdateRequest.getNickname(), profileUpdateRequest.getBio());
     }
 }

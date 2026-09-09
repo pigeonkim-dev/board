@@ -29,7 +29,16 @@
                              th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></div>
                     </div>
 
-                    <!-- 이미지 · 소개 · 현재 위치가 붙으면 여기에 칸이 는다. -->
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">자기소개</label>
+                        <textarea id="bio" class="form-control" th:field="*{bio}"
+                                  rows="4" maxlength="256"
+                                  placeholder="256자 이내"></textarea>
+                        <div class="text-danger small mt-1"
+                             th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}"></div>
+                    </div>
+
+                    <!-- 프로필 이미지는 B6-6 (업로드 + 저장소 선택)에서 붙는다. -->
 
                     <button type="submit" class="btn btn-primary">저장</button>
                     <a class="btn btn-link" th:href="@{/profile/me}">취소</a>
