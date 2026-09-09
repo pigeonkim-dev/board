@@ -2,8 +2,10 @@ package com.pigeonkim.board.service;
 
 import com.pigeonkim.board.component.ProfileFinder;
 import com.pigeonkim.board.domain.entity.Profile;
+import com.pigeonkim.board.exception.DuplicateException;
 import com.pigeonkim.board.repository.ProfileRepository;
 import com.pigeonkim.board.web.dto.ProfileResponse;
+import com.pigeonkim.board.web.dto.ProfileUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +23,26 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ProfileService {
     private final ProfileRepository profileRepository;
+    private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public ProfileResponse getByMemberEmail(String email) {
-        Profile profile = profileRepository.findByMemberEmail(email).
-                orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+    public ProfileResponse getProfileByEmail(String email) {
+        return ProfileResponse.from(profileFinder.findByMemberEmail(email));
+    }
 
-        return ProfileResponse.from(profile);
+    @Transactional
+    public void updateProfile(ProfileUpdateRequest profileUpdateRequest, String email) {
+
+        Profile profile = profileFinder.findByMemberEmail(email);
+
+        if (profile.getNickname().equals(profileUpdateRequest.getNickname())) {
+            return;
+        }
+
+        if (profileRepository.existsByNickname(profileUpdateRequest.getNickname())) {
+            throw new DuplicateException("이미 사용중인 닉네임 입니다.");
+        }
+
+        profile.updateNickName(profileUpdateRequest.getNickname());
     }
 }

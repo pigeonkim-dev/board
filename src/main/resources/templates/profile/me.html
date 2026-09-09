@@ -11,6 +11,9 @@
             <div class="app-card p-4">
                 <h1 class="h4 mb-4">내 정보</h1>
 
+                <!-- 리다이렉트하면서 넘어온 일회성 메시지. 새로고침하면 사라진다. -->
+                <div class="alert alert-success py-2" th:if="${message}" th:text="${message}"></div>
+
                 <dl class="row mb-0">
                     <dt class="col-sm-3 text-secondary fw-normal">닉네임</dt>
                     <dd class="col-sm-9" th:text="${profile.nickname}">닉네임</dd>
@@ -21,6 +24,7 @@
 
                 <hr class="my-4"/>
 
+                <a class="btn btn-primary" th:href="@{/profile/me/edit}">수정</a>
                 <a class="btn btn-outline-secondary" th:href="@{/board/posts}">목록으로</a>
             </div>
         </div>

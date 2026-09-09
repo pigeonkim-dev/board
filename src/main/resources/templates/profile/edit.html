@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('내 정보 수정')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="app-card p-4">
+                <h1 class="h4 mb-4">내 정보 수정</h1>
+
+                <form th:method="POST" th:action="@{/profile/me/edit}"
+                      th:object="${profileUpdateRequest}">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+
+                    <!-- 전역 에러 (닉네임 중복). 가입 폼과 같은 자리, 같은 방식.
+                         #fields 는 th:object 가 걸린 form 안에서만 동작한다. -->
+                    <div class="alert alert-danger py-2" th:if="${#fields.hasGlobalErrors()}">
+                        <p class="mb-0" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nickname" class="form-label">닉네임</label>
+                        <input type="text" id="nickname" class="form-control" th:field="*{nickname}"
+                               placeholder="닉네임 (2~20자)"/>
+                        <div class="text-danger small mt-1"
+                             th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></div>
+                    </div>
+
+                    <!-- 이미지 · 소개 · 현재 위치가 붙으면 여기에 칸이 는다. -->
+
+                    <button type="submit" class="btn btn-primary">저장</button>
+                    <a class="btn btn-link" th:href="@{/profile/me}">취소</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
