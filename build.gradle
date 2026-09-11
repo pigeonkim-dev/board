@@ -1,53 +1,30 @@
+// 루트에는 소스가 없다. 두 모듈의 공통 설정만 둔다.
+//
+// apply false 는 "플러그인의 버전만 정해두고 여기에는 적용하지 않는다"는 뜻이다.
+// 각 모듈이 자기 build.gradle 에서 버전 없이 id 만 적어 가져다 쓴다.
+// 버전을 한 곳에서만 관리하려는 것이다.
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '4.1.0'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.springframework.boot' version '4.1.0' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
 }
 
-group = 'com.pigeonkim'
-version = '0.0.1-SNAPSHOT'
+subprojects {
+    apply plugin: 'java'
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
+    group = 'com.pigeonkim'
+    version = '0.0.1-SNAPSHOT'
 
-repositories {
-	mavenCentral()
-}
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
 
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    repositories {
+        mavenCentral()
+    }
 
-	// Flyway — 스키마 마이그레이션. 세 개가 다 필요하다.
-	//  spring-boot-flyway          Boot 4 는 자동설정을 모듈별로 쪼갰다.
-	//                              FlywayAutoConfiguration 이 여기 있다.
-	//                              이게 없으면 라이브러리는 있는데 아무도 안 부른다.
-	//  flyway-core                 Flyway 본체
-	//  flyway-database-postgresql  Flyway 10 부터 DB별 지원이 분리됐다
-	implementation 'org.springframework.boot:spring-boot-flyway'
-	implementation 'org.flywaydb:flyway-core'
-	implementation 'org.flywaydb:flyway-database-postgresql'
-
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'org.postgresql:postgresql'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-	testCompileOnly 'org.projectlombok:lombok'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testAnnotationProcessor 'org.projectlombok:lombok'
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
 }

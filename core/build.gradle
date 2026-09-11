@@ -1,0 +1,47 @@
+plugins {
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+
+// core 는 실행하는 애플리케이션이 아니라 라이브러리다.
+//
+// Spring Boot 플러그인은 기본으로 실행 가능한 bootJar 를 만들고 일반 jar 를 끈다.
+// bootJar 안에서는 클래스가 BOOT-INF/classes/ 밑에 들어가 있어서
+// 다른 모듈이 클래스패스로 읽지 못한다.
+// 이 두 줄이 없으면 user-web 이 core 를 못 쓴다.
+tasks.named('bootJar') { enabled = false }
+tasks.named('jar') { enabled = true }
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // 비밀번호 해시.
+    // spring-boot-starter-security 전체가 아니라 암호화 기능만 든 작은 아티팩트를 쓴다.
+    // starter-security 를 넣으면 웹 필터체인·시큐리티 자동설정까지 딸려와
+    // "core 는 web 을 모른다"가 무너진다.
+    implementation 'org.springframework.security:spring-security-crypto'
+
+    // ⚠️ 갚아야 할 빚 — B0-10.5 에서 없앤다.
+    //
+    // BusinessException 과 자식 5종이 org.springframework.http.HttpStatus 를 들고 있다.
+    // HttpStatus 는 spring-web 아티팩트의 타입이다. 즉 지금 core 가 HTTP 를 안다.
+    //
+    // 이 줄을 지우고 컴파일해 보면 예외 6개가 전부 깨진다. 그게 지금의 위반이다.
+    // B0-10.5 에서 ErrorCode 로 바꾸면 이 줄이 사라진다.
+    implementation 'org.springframework:spring-web'
+
+    // 스키마는 도메인의 것이므로 마이그레이션 파일도 core 가 갖는다.
+    implementation 'org.springframework.boot:spring-boot-flyway'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+
+    runtimeOnly 'org.postgresql:postgresql'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

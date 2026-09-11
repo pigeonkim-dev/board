@@ -1,0 +1,36 @@
+plugins {
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+
+dependencies {
+    // ★ 이 한 줄이 이번 태스크의 전부다.
+    //
+    // 화살표가 여기서 core 로만 간다. core/build.gradle 에는 user-web 이 없다.
+    // 그래서 core 안에서 com.pigeonkim.board.web.* 을 import 하면 컴파일이 깨진다.
+    // 규칙이 머릿속이 아니라 빌드 파일에 적히는 것이다.
+    implementation project(':core')
+
+    // core 가 implementation 으로 가진 것은 컴파일 시점에 여기로 넘어오지 않는다.
+    // PostController 가 Page · Pageable 을 직접 쓰므로 여기서도 선언한다.
+    // 각 모듈이 자기가 쓰는 것을 스스로 적는 편이 나중에 읽기 쉽다.
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

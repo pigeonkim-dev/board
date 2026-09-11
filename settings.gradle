@@ -1,1 +1,6 @@
 rootProject.name = 'board'
+
+// 여기 적힌 것만 Gradle 이 모듈로 인식한다.
+// admin-web 은 B9-1 에서 한 줄 더 넣는다. 지금 만들면 6개월간 빈 모듈이다.
+include 'core'
+include 'user-web'
