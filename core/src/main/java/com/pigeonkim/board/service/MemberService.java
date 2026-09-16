@@ -2,7 +2,8 @@ package com.pigeonkim.board.service;
 
 import com.pigeonkim.board.domain.entity.Member;
 import com.pigeonkim.board.domain.entity.Profile;
-import com.pigeonkim.board.exception.DuplicateException;
+import com.pigeonkim.board.exception.BusinessException;
+import com.pigeonkim.board.exception.ErrorCode;
 import com.pigeonkim.board.repository.MemberRepository;
 import com.pigeonkim.board.domain.MemberRole;
 import com.pigeonkim.board.repository.ProfileRepository;
@@ -24,11 +25,11 @@ public class MemberService {
     public void signup(SignupCommand signupCommand){
 
         if (memberRepository.findByEmail(signupCommand.getEmail()).isPresent()) {
-            throw new DuplicateException("이미 사용중인 이메일입니다.");
+            throw new BusinessException(ErrorCode.EMAIL_DUPLICATED);
         }
 
         if (profileRepository.existsByNickname(signupCommand.getNickname())) {
-            throw new DuplicateException("이미 사용중인 닉네임입니다.");
+            throw new BusinessException(ErrorCode.NICKNAME_DUPLICATED);
         }
 
         String encodedPassword = passwordEncoder.encode(signupCommand.getPassword());

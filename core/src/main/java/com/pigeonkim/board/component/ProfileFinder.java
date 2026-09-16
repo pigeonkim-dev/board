@@ -1,9 +1,8 @@
 package com.pigeonkim.board.component;
 
-import com.pigeonkim.board.domain.entity.Member;
 import com.pigeonkim.board.domain.entity.Profile;
-import com.pigeonkim.board.exception.NotFoundException;
-import com.pigeonkim.board.repository.MemberRepository;
+import com.pigeonkim.board.exception.BusinessException;
+import com.pigeonkim.board.exception.ErrorCode;
 import com.pigeonkim.board.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,6 +22,6 @@ public class ProfileFinder {
 
     public Profile findByMemberEmail(String email) {
         return profileRepository.findByMemberEmail(email)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROFILE_NOT_FOUND));
     }
 }

@@ -1,6 +1,8 @@
 package com.pigeonkim.board.web.controller;
 
-import com.pigeonkim.board.exception.DuplicateException;
+import com.pigeonkim.board.exception.BusinessException;
+import com.pigeonkim.board.exception.ErrorCode;
+import com.pigeonkim.board.web.handler.ErrorMessages;
 import com.pigeonkim.board.service.ProfileService;
 import com.pigeonkim.board.service.result.ProfileResult;
 import com.pigeonkim.board.web.dto.ProfileUpdateRequest;
@@ -38,6 +40,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final ErrorMessages errorMessages;
     private final SecurityContextRepository securityContextRepository;
     private final CustomUserDetailsService customUserDetailsService;
 
@@ -80,8 +83,15 @@ public class ProfileController {
 
             profileService.updateProfile(customUserDetails.getUsername(), profileUpdateRequest.toCommand());
 
-        } catch (DuplicateException e) {
-            bindingResult.reject("duplicate", e.getMessage());
+        } catch (BusinessException e) {
+
+            // 닉네임 중복만 폼에서 다룬다. 나머지는 다시 던진다.
+            if (e.getErrorCode() != ErrorCode.NICKNAME_DUPLICATED) {
+                throw e;
+            }
+
+            bindingResult.reject("duplicate", errorMessages.of(e.getErrorCode()));
+
             return "profile/edit";
         }
 

@@ -2,8 +2,8 @@ package com.pigeonkim.board.service;
 
 import com.pigeonkim.board.component.ProfileFinder;
 import com.pigeonkim.board.domain.entity.Profile;
-import com.pigeonkim.board.exception.ForbiddenException;
-import com.pigeonkim.board.exception.NotFoundException;
+import com.pigeonkim.board.exception.BusinessException;
+import com.pigeonkim.board.exception.ErrorCode;
 import com.pigeonkim.board.domain.entity.Post;
 import com.pigeonkim.board.repository.PostRepository;
 import com.pigeonkim.board.domain.PostStatus;
@@ -67,9 +67,9 @@ class PostServiceTest {
     @Test
     void createPost_회원없음_예외() {
 
-        given(profileFinder.findByMemberEmail("test@test.com")).willThrow(new NotFoundException("not found"));
+        given(profileFinder.findByMemberEmail("test@test.com")).willThrow(new BusinessException(ErrorCode.PROFILE_NOT_FOUND));
 
-        assertThrows(NotFoundException.class,
+        assertThrows(BusinessException.class,
                 () -> postService.createPost("test@test.com", postRequest()));
     }
 
@@ -118,8 +118,10 @@ class PostServiceTest {
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
         given(profileFinder.findByMemberEmail(other.getEmail())).willReturn(profile2);
 
-        assertThrows(ForbiddenException.class,
+        BusinessException e = assertThrows(BusinessException.class,
                 () -> postService.updatePost(other.getEmail(), 1L, postRequest()));
+
+        assertEquals(ErrorCode.NOT_POST_AUTHOR, e.getErrorCode());
     }
 
     @Test
@@ -167,7 +169,9 @@ class PostServiceTest {
         given(postRepository.findActiveById(1L, PostStatus.ACTIVE)).willReturn(Optional.of(post));
         given(profileFinder.findByMemberEmail(other.getEmail())).willReturn(profile2);
 
-        assertThrows(ForbiddenException.class,
+        BusinessException e = assertThrows(BusinessException.class,
                 () -> postService.deletePost(other.getEmail(), 1L));
+
+        assertEquals(ErrorCode.NOT_POST_AUTHOR, e.getErrorCode());
     }
 }

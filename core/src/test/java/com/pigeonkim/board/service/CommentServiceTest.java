@@ -3,8 +3,8 @@ package com.pigeonkim.board.service;
 import com.pigeonkim.board.component.ProfileFinder;
 import com.pigeonkim.board.domain.*;
 import com.pigeonkim.board.domain.entity.*;
-import com.pigeonkim.board.exception.ConflictStateException;
-import com.pigeonkim.board.exception.ForbiddenException;
+import com.pigeonkim.board.exception.BusinessException;
+import com.pigeonkim.board.exception.ErrorCode;
 import com.pigeonkim.board.repository.*;
 import com.pigeonkim.board.domain.entity.Member;
 import com.pigeonkim.board.domain.MemberRole;
@@ -88,8 +88,10 @@ public class CommentServiceTest {
 
         given(postRepository.findActiveById(post.getId(), PostStatus.ACTIVE)).willReturn(Optional.of(post));
 
-        assertThrows(ConflictStateException.class,
+        BusinessException e = assertThrows(BusinessException.class,
                 () -> commentService.createComment(member.getEmail(), post.getId(), "코멘트"));
+
+        assertEquals(ErrorCode.COMMENTS_DISABLED, e.getErrorCode());
     }
 
     @Test
@@ -140,8 +142,10 @@ public class CommentServiceTest {
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
         given(profileFinder.findByMemberEmail(other.getEmail())).willReturn(profile2);
 
-        assertThrows(ForbiddenException.class,
+        BusinessException e = assertThrows(BusinessException.class,
                 () -> commentService.updateComment(other.getEmail(), post.getId(), comment.getId(), "코멘트"));
+
+        assertEquals(ErrorCode.NOT_COMMENT_AUTHOR, e.getErrorCode());
     }
 
     @Test

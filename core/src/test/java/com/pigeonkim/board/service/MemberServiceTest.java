@@ -2,7 +2,8 @@ package com.pigeonkim.board.service;
 
 import com.pigeonkim.board.domain.entity.Member;
 import com.pigeonkim.board.domain.entity.Profile;
-import com.pigeonkim.board.exception.DuplicateException;
+import com.pigeonkim.board.exception.BusinessException;
+import com.pigeonkim.board.exception.ErrorCode;
 import com.pigeonkim.board.repository.MemberRepository;
 import com.pigeonkim.board.repository.ProfileRepository;
 import com.pigeonkim.board.service.command.SignupCommand;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -58,7 +60,9 @@ public class MemberServiceTest {
         given(memberRepository.findByEmail(signupCommand.getEmail())).willReturn(Optional.of(mock(Member.class)));
 
         // when & then
-        assertThrows(DuplicateException.class, () -> memberService.signup(signupCommand));
+        BusinessException e = assertThrows(BusinessException.class, () -> memberService.signup(signupCommand));
+
+        assertEquals(ErrorCode.EMAIL_DUPLICATED, e.getErrorCode());
     }
 
     @Test
@@ -69,7 +73,9 @@ public class MemberServiceTest {
         given(profileRepository.existsByNickname(signupCommand.getNickname())).willReturn(true);
 
         // when & then
-        assertThrows(DuplicateException.class, () -> memberService.signup(signupCommand));
+        BusinessException e = assertThrows(BusinessException.class, () -> memberService.signup(signupCommand));
+
+        assertEquals(ErrorCode.NICKNAME_DUPLICATED, e.getErrorCode());
     }
 
 }

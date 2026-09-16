@@ -1,8 +1,8 @@
 package com.pigeonkim.board.service;
 
 import com.pigeonkim.board.component.ProfileFinder;
-import com.pigeonkim.board.exception.ForbiddenException;
-import com.pigeonkim.board.exception.NotFoundException;
+import com.pigeonkim.board.exception.BusinessException;
+import com.pigeonkim.board.exception.ErrorCode;
 import com.pigeonkim.board.domain.*;
 import com.pigeonkim.board.domain.entity.*;
 import com.pigeonkim.board.repository.*;
@@ -37,7 +37,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostResult getPost(Long postId, String email) {
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
         long commentCount = commentRepository.countByPostIdAndStatus(postId, CommentStatus.ACTIVE);
 
         Profile profile = email == null ? null : profileFinder.findByMemberEmail(email);
@@ -66,12 +66,12 @@ public class PostService {
     public void updatePost(String email, Long postId, PostCommand postCommand) {
 
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
         Profile profile = profileFinder.findByMemberEmail(email);
 
         if (!post.isAuthor(profile)) {
-            throw new ForbiddenException("작성자만 수정할 수 있습니다.");
+            throw new BusinessException(ErrorCode.NOT_POST_AUTHOR);
         }
 
         post.update(postCommand.getTitle(), postCommand.getContent(), postCommand.isCommentsEnabled());
@@ -81,12 +81,12 @@ public class PostService {
     public void deletePost(String email, Long postId) {
 
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
         Profile profile = profileFinder.findByMemberEmail(email);
 
         if (!post.isAuthor(profile)) {
-            throw new ForbiddenException("작성자만 삭제할 수 있습니다.");
+            throw new BusinessException(ErrorCode.NOT_POST_AUTHOR);
         }
 
         post.delete();

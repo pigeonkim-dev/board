@@ -3,9 +3,8 @@ package com.pigeonkim.board.service;
 import com.pigeonkim.board.component.ProfileFinder;
 import com.pigeonkim.board.domain.*;
 import com.pigeonkim.board.domain.entity.*;
-import com.pigeonkim.board.exception.ConflictStateException;
-import com.pigeonkim.board.exception.ForbiddenException;
-import com.pigeonkim.board.exception.NotFoundException;
+import com.pigeonkim.board.exception.BusinessException;
+import com.pigeonkim.board.exception.ErrorCode;
 import com.pigeonkim.board.repository.*;
 import com.pigeonkim.board.service.result.CommentResult;
 import lombok.RequiredArgsConstructor;
@@ -36,11 +35,11 @@ public class CommentService {
 
         // 1. 게시글 존재 확인
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new ConflictStateException("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
         // 2. 댓글 허용 여부
         if (!post.isCommentsEnabled()) {
-            throw new ConflictStateException("이 게시글은 댓글을 받지 않습니다.");
+            throw new BusinessException(ErrorCode.COMMENTS_DISABLED);
         }
 
         Profile profile = profileFinder.findByMemberEmail(email);
@@ -57,26 +56,26 @@ public class CommentService {
     @Transactional
     public void updateComment(String email, Long postId, Long commentId, String content) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
         if (comment.getStatus() == CommentStatus.DELETED) {
-            throw new ConflictStateException("삭제된 댓글입니다.");
+            throw new BusinessException(ErrorCode.COMMENT_DELETED);
         }
 
         // postId 정합성 검증
         if (!comment.getPost().getId().equals(postId)) {
-            throw new NotFoundException("게시글과 댓글이 일치하지 않습니다.");
+            throw new BusinessException(ErrorCode.POST_COMMENT_MISMATCH);
         }
 
         Profile profile = profileFinder.findByMemberEmail(email);
 
         if (!comment.isAuthor(profile)) {
-            throw new ForbiddenException("작성자가 아닙니다.");
+            throw new BusinessException(ErrorCode.NOT_COMMENT_AUTHOR);
         }
 
         // 삭제된 게시글 체크
         if (comment.getPost().getStatus() == PostStatus.DELETED) {
-            throw new ConflictStateException("삭제된 게시글의 댓글은 수정할 수 없습니다.");
+            throw new BusinessException(ErrorCode.POST_DELETED);
         }
 
         comment.update(content);
@@ -85,20 +84,20 @@ public class CommentService {
     @Transactional
     public void deleteComment(String email, Long postId, Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
         if (!comment.getPost().getId().equals(postId)) {
-            throw new NotFoundException("게시글과 댓글이 일치하지 않습니다.");
+            throw new BusinessException(ErrorCode.POST_COMMENT_MISMATCH);
         }
 
         if (comment.getPost().getStatus() == PostStatus.DELETED) {
-            throw new ConflictStateException("삭제된 게시글의 댓글은 삭제할 수 없습니다.");
+            throw new BusinessException(ErrorCode.POST_DELETED);
         }
 
         Profile profile = profileFinder.findByMemberEmail(email);
 
         if (!comment.isAuthor(profile)) {
-            throw new ForbiddenException("작성자가 아닙니다.");
+            throw new BusinessException(ErrorCode.NOT_COMMENT_AUTHOR);
         }
 
         comment.delete();

@@ -21,15 +21,6 @@ dependencies {
     // "core 는 web 을 모른다"가 무너진다.
     implementation 'org.springframework.security:spring-security-crypto'
 
-    // ⚠️ 갚아야 할 빚 — B0-10.5 에서 없앤다.
-    //
-    // BusinessException 과 자식 5종이 org.springframework.http.HttpStatus 를 들고 있다.
-    // HttpStatus 는 spring-web 아티팩트의 타입이다. 즉 지금 core 가 HTTP 를 안다.
-    //
-    // 이 줄을 지우고 컴파일해 보면 예외 6개가 전부 깨진다. 그게 지금의 위반이다.
-    // B0-10.5 에서 ErrorCode 로 바꾸면 이 줄이 사라진다.
-    implementation 'org.springframework:spring-web'
-
     // 스키마는 도메인의 것이므로 마이그레이션 파일도 core 가 갖는다.
     implementation 'org.springframework.boot:spring-boot-flyway'
     implementation 'org.flywaydb:flyway-core'

@@ -2,7 +2,8 @@ package com.pigeonkim.board.service;
 
 import com.pigeonkim.board.component.ProfileFinder;
 import com.pigeonkim.board.domain.entity.Profile;
-import com.pigeonkim.board.exception.DuplicateException;
+import com.pigeonkim.board.exception.BusinessException;
+import com.pigeonkim.board.exception.ErrorCode;
 import com.pigeonkim.board.repository.ProfileRepository;
 import com.pigeonkim.board.service.command.ProfileCommand;
 import com.pigeonkim.board.service.result.ProfileResult;
@@ -37,7 +38,7 @@ public class ProfileService {
 
         if (!profile.getNickname().equals(profileCommand.getNickname())) {
             if (profileRepository.existsByNickname(profileCommand.getNickname())) {
-                throw new DuplicateException("이미 사용중인 닉네임 입니다.");
+                throw new BusinessException(ErrorCode.NICKNAME_DUPLICATED);
             }
         }
 
