@@ -1,5 +1,7 @@
 package com.pigeonkim.board.web.controller;
 
+import com.pigeonkim.board.exception.BusinessException;
+import com.pigeonkim.board.exception.ErrorCode;
 import com.pigeonkim.board.service.command.PostCommand;
 import com.pigeonkim.board.service.result.CommentResult;
 import com.pigeonkim.board.service.result.PostResult;
@@ -48,7 +50,7 @@ public class PostController {
 
         String email = user != null ? user.getUsername() : null;
 
-        PostResult post = postService.getPost(id, email);
+        PostResult post = postService.getPost(email, id);
         List<CommentResult> comments = commentService.getComments(id, email);
 
         model.addAttribute("page", page);
@@ -82,9 +84,10 @@ public class PostController {
 
         String email = user != null ? user.getUsername() : null;
 
-        PostResult post = postService.getPost(id, email);
+        PostResult post = postService.getPostForEdit(email, id);
         model.addAttribute("page", page);
         model.addAttribute("post", post);
+        
         return "board/post/edit";
     }
 
@@ -100,7 +103,7 @@ public class PostController {
         if (bindingResult.hasErrors()) {
             String email = user != null ? user.getUsername() : null;
 
-            PostResult post = postService.getPost(id, email);
+            PostResult post = postService.getPost(email, id);
             model.addAttribute("page", page);
             model.addAttribute("post", post);
             return "board/post/edit";

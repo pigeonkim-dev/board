@@ -22,6 +22,20 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final ProfileFinder profileFinder;
 
+    private Post findOwnedPost(String email, Long postId) {
+
+        Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
+                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
+
+        Profile profile = profileFinder.findByMemberEmail(email);
+
+        if (!post.isAuthor(profile)) {
+            throw new BusinessException(ErrorCode.NOT_POST_AUTHOR);
+        }
+
+        return post;
+    }
+
     @Transactional(readOnly = true)
     public Page<PostResult> getPosts(Pageable pageable, String email) {
         Page<Post> posts = postRepository.findActivePosts(PostStatus.ACTIVE, pageable);
@@ -35,7 +49,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PostResult getPost(Long postId, String email) {
+    public PostResult getPost(String email, Long postId) {
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
         long commentCount = commentRepository.countByPostIdAndStatus(postId, CommentStatus.ACTIVE);
@@ -65,14 +79,7 @@ public class PostService {
     @Transactional
     public void updatePost(String email, Long postId, PostCommand postCommand) {
 
-        Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
-
-        Profile profile = profileFinder.findByMemberEmail(email);
-
-        if (!post.isAuthor(profile)) {
-            throw new BusinessException(ErrorCode.NOT_POST_AUTHOR);
-        }
+        Post post = findOwnedPost(email, postId);
 
         post.update(postCommand.getTitle(), postCommand.getContent(), postCommand.isCommentsEnabled());
     }
@@ -80,15 +87,18 @@ public class PostService {
     @Transactional
     public void deletePost(String email, Long postId) {
 
-        Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
-
-        Profile profile = profileFinder.findByMemberEmail(email);
-
-        if (!post.isAuthor(profile)) {
-            throw new BusinessException(ErrorCode.NOT_POST_AUTHOR);
-        }
+        Post post = findOwnedPost(email, postId);
 
         post.delete();
+    }
+
+    @Transactional(readOnly = true)
+    public PostResult getPostForEdit(String email, Long postId) {
+
+        Post post = findOwnedPost(email, postId);
+
+        long commentCount = commentRepository.countByPostIdAndStatus(postId, CommentStatus.ACTIVE);
+
+        return PostResult.from(post, commentCount, post.getAuthor());
     }
 }
