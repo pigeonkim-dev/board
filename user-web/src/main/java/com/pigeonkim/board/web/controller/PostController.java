@@ -87,7 +87,7 @@ public class PostController {
         PostResult post = postService.getPostForEdit(email, id);
         model.addAttribute("page", page);
         model.addAttribute("post", post);
-        
+
         return "board/post/edit";
     }
 
