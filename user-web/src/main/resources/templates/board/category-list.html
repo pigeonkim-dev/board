@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('게시판')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-4">
+    <div class="app-card p-4">
+        <h1 class="h4 mb-1">게시판</h1>
+        <p class="text-secondary small mb-4">
+            B1-1 확인용 임시 화면입니다. 트리 모양으로 만드는 것은 B1-2 입니다.
+        </p>
+
+        <table class="table table-sm align-middle mb-0">
+            <thead>
+            <tr class="text-secondary small">
+                <th style="width:80px">id</th>
+                <th style="width:120px">parent_id</th>
+                <th>이름</th>
+                <th style="width:100px">순서</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${categories}">
+                <td th:text="${c.id}"></td>
+                <td>
+                    <span th:if="${c.parentId != null}" th:text="${c.parentId}"></span>
+                    <span th:if="${c.parentId == null}" class="text-secondary">최상위</span>
+                </td>
+                <td th:text="${c.categoryName}"></td>
+                <td th:text="${c.displayOrder}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p th:if="${categories.empty}" class="text-secondary small mb-0">
+            카테고리가 없습니다. V9 가 적용됐는지 확인하세요.
+        </p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
