@@ -32,6 +32,23 @@
                 <button type="submit" class="btn btn-primary w-100">로그인</button>
             </form>
 
+            <!-- 선행 주간 2일차. board P1-5(10/22)에서 위 폼이 사라지고 이것만 남는다. -->
+            <div class="d-flex align-items-center my-3">
+                <hr class="flex-grow-1 m-0"/>
+                <span class="px-2 text-secondary small">또는</span>
+                <hr class="flex-grow-1 m-0"/>
+            </div>
+
+            <!--
+              /oauth2/authorization/{registrationId} 는 Spring Security 가 고정으로 잡는 경로다.
+              우리가 만드는 엔드포인트가 아니라 OAuth2AuthorizationRequestRedirectFilter 가 가로챈다.
+              registrationId 는 application.yaml 의 registration 이름(board)과 같아야 한다.
+              POST 가 아니라 평범한 링크(GET)다 — 여기서 IdP 로 리다이렉트만 일어난다.
+            -->
+            <a class="btn btn-outline-dark w-100" th:href="@{/oauth2/authorization/board}">
+                IdP 로 로그인
+            </a>
+
             <p class="text-center text-secondary small mt-3 mb-0">
                 아직 계정이 없으신가요? <a th:href="@{/member/signup}">회원가입</a>
             </p>

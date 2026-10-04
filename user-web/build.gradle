@@ -17,10 +17,28 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // TODO 2-1  OAuth2 클라이언트 스타터를 한 줄 추가한다.
+    //
+    //  이름을 조심한다. Boot 4.1 BOM 에는 비슷한 이름이 둘 있다 (직접 확인함):
+    //    spring-boot-starter-oauth2-client
+    //    spring-boot-starter-security-oauth2-client
+    //  우리는 뒤쪽을 쓴다. 이 모듈이 이미 security- 접두 계열로 통일돼 있고
+    //  (아래 testImplementation 들을 보라), 내용을 확인한 쪽이기도 하다.
+    //
+    //  이 스타터가 데려오는 것:
+    //    spring-boot-starter-security            (이미 위에 있다)
+    //    spring-boot-security-oauth2-client      ← 자동설정. Boot 4 는 모듈별로 쪼개져 있다
+    //    spring-security-oauth2-jose             ← JWT 서명 검증 (ID 토큰을 푸는 데 쓴다)
+    //
+    //  왜 자동설정이 따로 필요한가: 라이브러리만 넣으면 클래스는 있는데
+    //  application.yaml 의 spring.security.oauth2.client.* 를 읽어줄 사람이 없다.
+
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

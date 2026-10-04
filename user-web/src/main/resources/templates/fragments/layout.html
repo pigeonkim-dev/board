@@ -39,7 +39,29 @@
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     <a class="nav-link me-1" th:href="@{/profile/me}">
-                        <strong sec:authentication="principal.nickname">닉네임</strong>님
+                        <!--
+                          선행 주간 한정 분기. board P1-5(10/22) 에서 지운다.
+
+                          지금 로그인 경로가 둘이라 principal 타입도 둘이다.
+                            폼로그인  CustomUserDetails  — getNickname() 이 있다
+                            IdP       DefaultOidcUser    — 없다. 닉네임은 IdP 가 아니라
+                                                           board 의 Profile 에 있으니까
+                          예전에는 sec:authentication="principal.nickname" 한 줄이었는데,
+                          IdP 로 들어오면 NotReadablePropertyException 으로 500 이 났다.
+                          sec:authentication 은 안전 탐색(?.)이 없어서 막을 방법이 없다.
+
+                          그래서 th:text 로 바꾸고 SpEL 로 타입을 본다.
+                          #authentication 은 thymeleaf-extras-springsecurity 가 주는
+                          표현식 객체다 (= SecurityContext 의 Authentication).
+                          IdP 쪽은 name(= sub = publicId)을 앞 8자만 보여준다 — UUID 전체는 너무 길다.
+
+                          P1-5 에서 BoardOidcUser 가 nickname 을 들고 오면
+                          이 분기가 사라지고 principal.nickname 한 줄로 돌아간다.
+                        -->
+                        <strong th:text="${#authentication.principal
+                                   instanceof T(com.pigeonkim.board.web.security.CustomUserDetails)
+                                     ? #authentication.principal.nickname
+                                     : '#' + #strings.abbreviate(#authentication.name, 11)}">닉네임</strong>님
                     </a>
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
