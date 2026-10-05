@@ -1,0 +1,47 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# board(user-web) 운영 설정 틀.
+#
+# 이 파일은 "틀"이다. <...> 자리에 실제 값을 넣은 파일은
+#   서버의  /opt/board/config/application-prod.yml
+# 에만 둔다. 이 저장소는 공개 저장소다. 실제 값이 든 파일은 절대 올리지 않는다.
+#
+# 서버에서 띄우는 법 (작업 디렉터리가 /opt/board 여야 ./config/ 를 읽는다):
+#   java -jar board.jar --spring.profiles.active=prod
+#
+# 환경과 무관한 값(client-id, redirect-uri, scope 등)은 jar 안의 application.yaml 에 있다.
+# 여기에는 환경마다 달라지는 값만 적는다. 스프링이 두 파일을 프로퍼티 이름 단위로 합친다.
+# ─────────────────────────────────────────────────────────────────────────────
+
+server:
+  # 앞에 리버스 프록시(HTTPS 를 받아 우리 앱의 8080 포트로 넘겨주는 문지기)가 선다.
+  # 이 설정이 없으면 redirect-uri 의 {baseUrl} 이 http://localhost:8080 으로 채워져
+  # IdP 에 등록된 https://board.pigeonkim.dev/login/oauth2/code/board 와 어긋나 로그인이 깨진다.
+  forward-headers-strategy: framework
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/board
+    username: <DB 계정>
+    password: <DB 비밀번호>
+
+  thymeleaf:
+    cache: true                 # application.yaml 은 개발용으로 false 다. 운영은 켠다
+
+  security:
+    oauth2:
+      client:
+        registration:
+          board:
+            # IdP 운영 설정의 app.clients.board.secret 과 같은 값
+            client-secret: <IdP 와 같은 랜덤 값>
+        provider:
+          board:
+            # IdP 의 app.issuer 와 글자까지 같아야 한다. 끝에 / 를 붙이지 않는다.
+            # ⚠️ board 는 기동할 때 이 주소의 /.well-known/openid-configuration 을 부른다.
+            #    IdP 가 먼저 떠 있어야 board 가 뜬다.
+            issuer-uri: https://idp.pigeonkim.dev
+
+logging:
+  level:
+    com.pigeonkim.board: INFO
+    org.hibernate.SQL: WARN
