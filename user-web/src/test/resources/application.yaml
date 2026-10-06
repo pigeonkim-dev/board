@@ -14,6 +14,28 @@ spring:
     password: ""
     driver-class-name: org.postgresql.Driver
 
+  # IdP 등록. 이 설정이 있어야 ClientRegistrationRepository 빈이 생기고 SecurityConfig 가 뜬다.
+  # issuer-uri 를 쓰면 기동 때 IdP 에 접속해 주소를 받아오므로 IdP 가 꺼져 있으면 테스트가 깨진다.
+  # 그래서 주소를 직접 적는다. 테스트는 실제 로그인을 하지 않으므로 어디에도 접속하지 않는다.
+  security:
+    oauth2:
+      client:
+        registration:
+          board:
+            client-id: board-client
+            client-secret: test-secret
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid, profile
+        provider:
+          board:
+            authorization-uri: http://127.0.0.1:9000/oauth2/authorize
+            token-uri: http://127.0.0.1:9000/oauth2/token
+            jwk-set-uri: http://127.0.0.1:9000/oauth2/jwks
+            user-info-uri: http://127.0.0.1:9000/userinfo
+            user-name-attribute: sub
+
   # 테스트 스키마도 Flyway 가 만든다.
   # ddl-auto 로 만들면 Hibernate 가 만든 스키마를 검증하게 되어
   # 실제 운영 스키마와 조용히 갈라진다. H2 를 거부한 이유와 같다.
