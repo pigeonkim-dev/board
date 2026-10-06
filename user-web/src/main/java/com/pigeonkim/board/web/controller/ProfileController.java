@@ -11,11 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -41,8 +36,7 @@ public class ProfileController {
 
     private final ProfileService profileService;
     private final ErrorMessages errorMessages;
-    private final SecurityContextRepository securityContextRepository;
-    private final BoardOidcUserService boardOidcUserService;
+    private final LoginRefresher loginRefresher;
 
     @GetMapping("/profile/me")
     public String me(@CurrentUser UUID publicId,
@@ -71,10 +65,9 @@ public class ProfileController {
     public String edit(@CurrentUser UUID publicId,
                        @Valid @ModelAttribute ProfileUpdateRequest profileUpdateRequest,
                        BindingResult bindingResult,
-                       Model model,
                        RedirectAttributes redirectAttributes,
-                       HttpServletRequest httpServletRequest,
-                       HttpServletResponse httpServletResponse) {
+                       HttpServletRequest request,
+                       HttpServletResponse response) {
 
         if (bindingResult.hasErrors()) {
             return "profile/edit";
@@ -93,17 +86,7 @@ public class ProfileController {
             return "profile/edit";
         }
 
-        OAuth2AuthenticationToken current =
-                (OAuth2AuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        BoardOidcUser newPrincipal = boardOidcUserService.reload((BoardOidcUser) current.getPrincipal());
-
-        Authentication newAuthentication = new OAuth2AuthenticationToken(
-                newPrincipal, newPrincipal.getAuthorities(), current.getAuthorizedClientRegistrationId());
-        SecurityContext newContext = SecurityContextHolder.createEmptyContext();
-        newContext.setAuthentication(newAuthentication);
-        SecurityContextHolder.setContext(newContext);
-
-        securityContextRepository.saveContext(newContext, httpServletRequest, httpServletResponse);
+        loginRefresher.refresh(request, response);
 
         redirectAttributes.addFlashAttribute("message", "프로필이 수정 되었습니다.");
 

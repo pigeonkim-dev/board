@@ -6,6 +6,8 @@
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
 <main class="container py-5">
+    <!-- 가입 완료 등 한 번만 보여줄 안내. 플래시 속성 message 가 있을 때만. -->
+    <div class="alert alert-success py-2 mt-3" th:if="${message}" th:text="${message}"></div>
     <div class="app-card p-5 text-center">
         <h1 class="fw-bold mb-3">Board</h1>
         <p class="text-secondary mb-4">Spring Boot로 만든 게시판입니다. 글을 쓰고 댓글로 이야기를 나눠보세요.</p>

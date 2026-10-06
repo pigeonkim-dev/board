@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('가입')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+    <div class="auth-wrap">
+        <div class="app-card p-4">
+            <h1 class="h4 text-center mb-2">닉네임을 정해 주세요</h1>
+            <p class="text-center text-secondary small mb-4">
+                IdP 로그인은 끝났습니다. board 에서 쓸 닉네임 하나만 정하면 가입이 완료됩니다.
+            </p>
+
+            <form th:method="POST" th:action="@{/signup}" th:object="${profileSetupRequest}">
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+
+                <!-- 전역 에러 (닉네임 중복). profile/edit.html 과 같은 방식. -->
+                <div class="alert alert-danger py-2" th:if="${#fields.hasGlobalErrors()}">
+                    <p class="mb-0" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+                </div>
+
+                <div class="mb-3">
+                    <label for="nickname" class="form-label">닉네임</label>
+                    <input type="text" id="nickname" class="form-control" th:field="*{nickname}"
+                           placeholder="닉네임 (2~20자)" autofocus/>
+                    <div class="text-danger small mt-1"
+                         th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">가입 완료</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
