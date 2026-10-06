@@ -1,6 +1,5 @@
 package com.pigeonkim.board.web.dto;
 
-import com.pigeonkim.board.service.command.ProfileCommand;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;

@@ -2,7 +2,6 @@ package com.pigeonkim.board.domain.entity;
 
 import com.pigeonkim.board.domain.MemberRole;
 
-import com.pigeonkim.board.domain.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

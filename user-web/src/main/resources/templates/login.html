@@ -13,11 +13,8 @@
             <div th:if="${param.error}" class="alert alert-danger py-2">
                 로그인에 실패했습니다. 다시 시도해 주세요.
             </div>
-            <div th:if="${param.logout}" class="alert alert-success py-2">
-                로그아웃되었습니다.
-            </div>
 
-            <!-- 10/6 7단계: 폼로그인을 지웠다. 로그인 수단은 IdP 하나다. -->
+            <!-- 로그인 수단은 IdP 하나다. 실패하면 Spring 이 /login?error 로 돌려보낸다. -->
             <a class="btn btn-primary w-100" th:href="@{/oauth2/authorization/board}">
                 IdP 로 로그인
             </a>

@@ -28,7 +28,7 @@ public class CategoryController {
     private final CategoryRepository categoryRepository;
 
     @GetMapping("/board")
-    public String tree(Model model) {
+    public String categoryTree(Model model) {
 
         List<Category> categories = categoryRepository.findAll(Sort.by("displayOrder"));
         model.addAttribute("categories", categories);

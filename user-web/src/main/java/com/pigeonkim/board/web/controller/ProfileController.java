@@ -2,10 +2,10 @@ package com.pigeonkim.board.web.controller;
 
 import com.pigeonkim.board.exception.BusinessException;
 import com.pigeonkim.board.exception.ErrorCode;
-import com.pigeonkim.board.web.handler.ErrorMessages;
 import com.pigeonkim.board.service.ProfileService;
 import com.pigeonkim.board.service.result.ProfileResult;
 import com.pigeonkim.board.web.dto.ProfileUpdateRequest;
+import com.pigeonkim.board.web.handler.ErrorMessages;
 import com.pigeonkim.board.web.security.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,7 +39,7 @@ public class ProfileController {
     private final LoginRefresher loginRefresher;
 
     @GetMapping("/profile/me")
-    public String me(@CurrentUser UUID publicId,
+    public String profile(@CurrentUser UUID publicId,
                      Model model) {
 
         ProfileResult profile = profileService.getProfileByPublicId(publicId);
@@ -49,7 +49,7 @@ public class ProfileController {
     }
 
     @GetMapping("/profile/me/edit")
-    public String edit(@CurrentUser UUID publicId,
+    public String profileEditForm(@CurrentUser UUID publicId,
                        Model model) {
         ProfileResult profileResult = profileService.getProfileByPublicId(publicId);
         ProfileUpdateRequest profileUpdateRequest = new ProfileUpdateRequest();
@@ -62,7 +62,7 @@ public class ProfileController {
     }
 
     @PostMapping("/profile/me/edit")
-    public String edit(@CurrentUser UUID publicId,
+    public String updateProfile(@CurrentUser UUID publicId,
                        @Valid @ModelAttribute ProfileUpdateRequest profileUpdateRequest,
                        BindingResult bindingResult,
                        RedirectAttributes redirectAttributes,

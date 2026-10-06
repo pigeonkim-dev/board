@@ -1,7 +1,7 @@
 package com.pigeonkim.board.repository;
 
-import com.pigeonkim.board.domain.entity.Comment;
 import com.pigeonkim.board.domain.CommentStatus;
+import com.pigeonkim.board.domain.entity.Comment;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

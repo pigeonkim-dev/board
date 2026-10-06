@@ -1,4 +1,4 @@
-package com.pigeonkim.board.component;
+package com.pigeonkim.board.advice;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

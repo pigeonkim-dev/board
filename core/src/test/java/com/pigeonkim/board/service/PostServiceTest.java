@@ -1,15 +1,15 @@
 package com.pigeonkim.board.service;
 
 import com.pigeonkim.board.component.ProfileFinder;
+import com.pigeonkim.board.domain.MemberRole;
+import com.pigeonkim.board.domain.PostStatus;
+import com.pigeonkim.board.domain.entity.Member;
+import com.pigeonkim.board.domain.entity.Post;
 import com.pigeonkim.board.domain.entity.Profile;
 import com.pigeonkim.board.exception.BusinessException;
 import com.pigeonkim.board.exception.ErrorCode;
-import com.pigeonkim.board.domain.entity.Post;
 import com.pigeonkim.board.repository.PostRepository;
-import com.pigeonkim.board.domain.PostStatus;
 import com.pigeonkim.board.service.command.PostCommand;
-import com.pigeonkim.board.domain.entity.Member;
-import com.pigeonkim.board.domain.MemberRole;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,7 +1,7 @@
 package com.pigeonkim.board.repository;
 
-import com.pigeonkim.board.domain.entity.Post;
 import com.pigeonkim.board.domain.PostStatus;
+import com.pigeonkim.board.domain.entity.Post;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

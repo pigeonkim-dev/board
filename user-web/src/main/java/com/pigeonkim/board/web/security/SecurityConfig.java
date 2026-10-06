@@ -46,19 +46,18 @@ public class SecurityConfig {
                 .securityContext(context -> context
                         .securityContextRepository(securityContextRepository()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/member/login",
+                        .requestMatchers("/", "/login",
                                 "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/board/posts").permitAll()
                         .requestMatchers(HttpMethod.GET, "/board/posts/{id:\\d+}").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/.well-known/**").permitAll()
-                        // TODO 9-1  "/whoami" 를 지운다. 진단용 컨트롤러를 없앴다 → .requestMatchers("/signup").authenticated()
-                        .requestMatchers("/signup", "/whoami").authenticated()
+                        .requestMatchers("/signup").authenticated()
                         .requestMatchers("/board/**").hasRole("USER")
                         .anyRequest().hasRole("USER")
                 )
                 .oauth2Login(oauth -> oauth
-                        .loginPage("/member/login")
+                        .loginPage("/login")
                         .successHandler(signupRedirectSuccessHandler)
                         .permitAll()
                         .userInfoEndpoint(userinfo ->

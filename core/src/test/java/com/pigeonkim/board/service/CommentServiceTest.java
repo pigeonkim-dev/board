@@ -6,8 +6,6 @@ import com.pigeonkim.board.domain.entity.*;
 import com.pigeonkim.board.exception.BusinessException;
 import com.pigeonkim.board.exception.ErrorCode;
 import com.pigeonkim.board.repository.*;
-import com.pigeonkim.board.domain.entity.Member;
-import com.pigeonkim.board.domain.MemberRole;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

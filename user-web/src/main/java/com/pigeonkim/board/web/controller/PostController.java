@@ -1,11 +1,11 @@
 package com.pigeonkim.board.web.controller;
 
+import com.pigeonkim.board.service.CommentService;
+import com.pigeonkim.board.service.PostService;
 import com.pigeonkim.board.service.result.CommentResult;
 import com.pigeonkim.board.service.result.PostResult;
 import com.pigeonkim.board.web.dto.CommentRequest;
 import com.pigeonkim.board.web.dto.PostRequest;
-import com.pigeonkim.board.service.CommentService;
-import com.pigeonkim.board.service.PostService;
 import com.pigeonkim.board.web.security.CurrentUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class PostController {
     private final CommentService commentService;  // ← 추가
 
     @GetMapping("/board/posts")
-    public String list(@PageableDefault(size = 10) Pageable pageable,
+    public String postList(@PageableDefault(size = 10) Pageable pageable,
                        Model model,
                        @CurrentUser UUID publicId) {
 
@@ -38,7 +38,7 @@ public class PostController {
     }
 
     @GetMapping("/board/posts/{id}")
-    public String detail(@PathVariable Long id,
+    public String postDetail(@PathVariable Long id,
                          @RequestParam(defaultValue = "0") int page,
                          Model model,
                          @CurrentUser UUID publicId) {
@@ -55,7 +55,7 @@ public class PostController {
     }
 
     @PostMapping("/board/posts/new")
-    public String write(@Valid @ModelAttribute PostRequest postRequest,
+    public String writePost(@Valid @ModelAttribute PostRequest postRequest,
                         BindingResult bindingResult,
                         @CurrentUser UUID publicId) {
 
@@ -82,7 +82,7 @@ public class PostController {
     }
 
     @PostMapping("/board/posts/{id}/edit")
-    public String edit(@PathVariable Long id,
+    public String editPost(@PathVariable Long id,
                        @RequestParam(defaultValue = "0") int page,
                        @Valid @ModelAttribute PostRequest postRequest,
                        BindingResult bindingResult,
@@ -104,7 +104,7 @@ public class PostController {
     }
 
     @PostMapping("/board/posts/{id}/delete")
-    public String delete(@PathVariable Long id,
+    public String deletePost(@PathVariable Long id,
                          @RequestParam(defaultValue = "0") int page,
                          @CurrentUser UUID publicId,
                          RedirectAttributes redirectAttributes) {

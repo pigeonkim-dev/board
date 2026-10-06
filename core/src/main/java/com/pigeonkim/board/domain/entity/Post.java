@@ -2,8 +2,6 @@ package com.pigeonkim.board.domain.entity;
 
 import com.pigeonkim.board.domain.PostStatus;
 
-import com.pigeonkim.board.domain.entity.BaseEntity;
-import com.pigeonkim.board.domain.entity.Member;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

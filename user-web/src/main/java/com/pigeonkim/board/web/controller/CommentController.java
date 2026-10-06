@@ -1,7 +1,7 @@
 package com.pigeonkim.board.web.controller;
 
-import com.pigeonkim.board.web.dto.CommentRequest;
 import com.pigeonkim.board.service.CommentService;
+import com.pigeonkim.board.web.dto.CommentRequest;
 import com.pigeonkim.board.web.security.CurrentUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/board/posts/{postId}/comments")
-    public String create(@PathVariable Long postId,
+    public String writeComment(@PathVariable Long postId,
                          @RequestParam(defaultValue = "0") int page,
                          @Valid @ModelAttribute CommentRequest request,
                          BindingResult bindingResult,
@@ -49,7 +49,7 @@ public class CommentController {
     }
 
     @PostMapping("/board/posts/{postId}/comments/{commentId}/edit")
-    public String update(@PathVariable Long postId,
+    public String editComment(@PathVariable Long postId,
                          @PathVariable Long commentId,
                          @RequestParam(defaultValue = "0") int page,
                          @Valid @ModelAttribute CommentRequest request,
@@ -76,7 +76,7 @@ public class CommentController {
     }
 
     @PostMapping("/board/posts/{postId}/comments/{commentId}/delete")
-    public String delete(@PathVariable Long postId,
+    public String deleteComment(@PathVariable Long postId,
                          @PathVariable Long commentId,
                          @RequestParam(defaultValue = "0") int page,
                          @CurrentUser UUID publicId,
