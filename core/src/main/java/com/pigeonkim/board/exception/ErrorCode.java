@@ -25,7 +25,6 @@ public enum ErrorCode {
     NOT_COMMENT_AUTHOR,      // CommentService 2곳 (수정 · 삭제)
 
     // ── 이미 쓰이고 있다 ───────────────────────────────────
-    EMAIL_DUPLICATED,        // MemberService 1곳
     NICKNAME_DUPLICATED,     // MemberService · ProfileService 2곳
 
     // ── 지금 그럴 수 있는 상태가 아니다 ─────────────────────

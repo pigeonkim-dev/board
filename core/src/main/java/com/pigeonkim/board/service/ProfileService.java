@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 /**
  * 프로필 조회·수정을 담당한다.
  * <p>
@@ -27,14 +29,14 @@ public class ProfileService {
     private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public ProfileResult getProfileByEmail(String email) {
-        return ProfileResult.from(profileFinder.findByMemberEmail(email));
+    public ProfileResult getProfileByPublicId(UUID publicId) {
+        return ProfileResult.from(profileFinder.findByMemberPublicId(publicId));
     }
 
     @Transactional
-    public void updateProfile(String email, ProfileCommand profileCommand) {
+    public void updateProfile(UUID publicId, ProfileCommand profileCommand) {
 
-        Profile profile = profileFinder.findByMemberEmail(email);
+        Profile profile = profileFinder.findByMemberPublicId(publicId);
 
         if (!profile.getNickname().equals(profileCommand.getNickname())) {
             if (profileRepository.existsByNickname(profileCommand.getNickname())) {

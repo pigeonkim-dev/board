@@ -2,10 +2,9 @@ package com.pigeonkim.board.web.controller;
 
 import com.pigeonkim.board.web.dto.CommentRequest;
 import com.pigeonkim.board.service.CommentService;
-import com.pigeonkim.board.web.security.CustomUserDetails;
+import com.pigeonkim.board.web.security.CurrentUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -13,6 +12,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.UUID;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ public class CommentController {
                          @RequestParam(defaultValue = "0") int page,
                          @Valid @ModelAttribute CommentRequest request,
                          BindingResult bindingResult,
-                         @AuthenticationPrincipal CustomUserDetails user,
+                         @CurrentUser UUID publicId,
                          RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
@@ -40,7 +41,7 @@ public class CommentController {
             return "redirect:/board/posts/" + postId;
         }
 
-        commentService.createComment(user.getEmail(), postId, request.getContent());
+        commentService.createComment(publicId, postId, request.getContent());
 
         redirectAttributes.addAttribute("page", page);
 
@@ -53,7 +54,7 @@ public class CommentController {
                          @RequestParam(defaultValue = "0") int page,
                          @Valid @ModelAttribute CommentRequest request,
                          BindingResult bindingResult,
-                         @AuthenticationPrincipal CustomUserDetails user,
+                         @CurrentUser UUID publicId,
                          RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
@@ -68,7 +69,7 @@ public class CommentController {
             return "redirect:/board/posts/" + postId;
         }
 
-        commentService.updateComment(user.getEmail(), postId, commentId, request.getContent());
+        commentService.updateComment(publicId, postId, commentId, request.getContent());
         redirectAttributes.addAttribute("page", page);
 
         return "redirect:/board/posts/" + postId;
@@ -78,10 +79,10 @@ public class CommentController {
     public String delete(@PathVariable Long postId,
                          @PathVariable Long commentId,
                          @RequestParam(defaultValue = "0") int page,
-                         @AuthenticationPrincipal CustomUserDetails user,
+                         @CurrentUser UUID publicId,
                          RedirectAttributes redirectAttributes) {
 
-        commentService.deleteComment(user.getEmail(), postId, commentId);
+        commentService.deleteComment(publicId, postId, commentId);
         redirectAttributes.addAttribute("page", page);
 
         return "redirect:/board/posts/" + postId;

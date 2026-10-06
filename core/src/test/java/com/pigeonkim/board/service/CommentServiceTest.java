@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -37,12 +38,12 @@ public class CommentServiceTest {
     @InjectMocks
     private CommentService commentService;
 
-    private Member member(String email, long id, String nickname) {
+    private Member member(long id, String nickname) {
         Member m = Member.builder()
-                .email(email)
-                .password("encoded")
                 .role(MemberRole.USER)
+                .publicId(UUID.randomUUID())
                 .build();
+
         ReflectionTestUtils.setField(m, "id", id);
 
         return m;
@@ -55,6 +56,7 @@ public class CommentServiceTest {
                 .title("title")
                 .content("content")
                 .build();
+
         ReflectionTestUtils.setField(post, "id", 1L);
 
         return post;
@@ -62,24 +64,24 @@ public class CommentServiceTest {
 
     @Test
     void createComment_성공() {
-        Member member = member("test@test.com", 1L, "Raccoon");
+        Member member = member(1L, "Raccoon");
 
         Profile profile = new Profile(member, "test");
         ReflectionTestUtils.setField(profile, "id", 1L);
 
         Post post = post(profile, true);
 
-        given(profileFinder.findByMemberEmail(member.getEmail())).willReturn(profile);
+        given(profileFinder.findByMemberPublicId(member.getPublicId())).willReturn(profile);
         given(postRepository.findActiveById(post.getId(), PostStatus.ACTIVE)).willReturn(Optional.of(post));
 
-        commentService.createComment(member.getEmail(), post.getId(), "코멘트");
+        commentService.createComment(member.getPublicId(), post.getId(), "코멘트");
 
         verify(commentRepository, times(1)).save(any(Comment.class));
     }
 
     @Test
     void createComment_댓글비허용_예외() {
-        Member member = member("test@test.com", 1L, "Raccoon");
+        Member member = member(1L, "Raccoon");
 
         Profile profile = new Profile(member, "test");
         ReflectionTestUtils.setField(profile, "id", 1L);
@@ -89,14 +91,14 @@ public class CommentServiceTest {
         given(postRepository.findActiveById(post.getId(), PostStatus.ACTIVE)).willReturn(Optional.of(post));
 
         BusinessException e = assertThrows(BusinessException.class,
-                () -> commentService.createComment(member.getEmail(), post.getId(), "코멘트"));
+                () -> commentService.createComment(member.getPublicId(), post.getId(), "코멘트"));
 
         assertEquals(ErrorCode.COMMENTS_DISABLED, e.getErrorCode());
     }
 
     @Test
     void updateComment_성공() {
-        Member member = member("test@test.com", 1L, "Raccoon");
+        Member member = member(1L, "Raccoon");
 
         Profile profile = new Profile(member, "test");
         ReflectionTestUtils.setField(profile, "id", 1L);
@@ -111,17 +113,17 @@ public class CommentServiceTest {
         ReflectionTestUtils.setField(comment, "id", 1L);
 
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
-        given(profileFinder.findByMemberEmail(member.getEmail())).willReturn(profile);
+        given(profileFinder.findByMemberPublicId(member.getPublicId())).willReturn(profile);
 
-        commentService.updateComment(member.getEmail(), post.getId(), comment.getId(), "새 내용");
+        commentService.updateComment(member.getPublicId(), post.getId(), comment.getId(), "새 내용");
 
         assertEquals("새 내용", comment.getContent());
     }
 
     @Test
     void updateComment_작성자아님_예외() {
-        Member author = member("test@test.com", 1L, "Raccoon");
-        Member other = member("other@test.com", 3L, "Fox");
+        Member author = member(1L, "Raccoon");
+        Member other = member(3L, "Fox");
 
         Profile profile = new Profile(author, "test");
         ReflectionTestUtils.setField(profile, "id", 1L);
@@ -140,17 +142,17 @@ public class CommentServiceTest {
         ReflectionTestUtils.setField(comment, "id", 1L);
 
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
-        given(profileFinder.findByMemberEmail(other.getEmail())).willReturn(profile2);
+        given(profileFinder.findByMemberPublicId(other.getPublicId())).willReturn(profile2);
 
         BusinessException e = assertThrows(BusinessException.class,
-                () -> commentService.updateComment(other.getEmail(), post.getId(), comment.getId(), "코멘트"));
+                () -> commentService.updateComment(other.getPublicId(), post.getId(), comment.getId(), "코멘트"));
 
         assertEquals(ErrorCode.NOT_COMMENT_AUTHOR, e.getErrorCode());
     }
 
     @Test
     void deleteComment_성공() {
-        Member member = member("test@test.com", 1L, "Raccoon");
+        Member member = member(1L, "Raccoon");
 
         Profile profile = new Profile(member, "test");
         ReflectionTestUtils.setField(profile, "id", 1L);
@@ -165,9 +167,9 @@ public class CommentServiceTest {
         ReflectionTestUtils.setField(comment, "id", 1L);
 
         given(commentRepository.findById(comment.getId())).willReturn(Optional.of(comment));
-        given(profileFinder.findByMemberEmail(member.getEmail())).willReturn(profile);
+        given(profileFinder.findByMemberPublicId(member.getPublicId())).willReturn(profile);
 
-        commentService.deleteComment(member.getEmail(), post.getId(), comment.getId());
+        commentService.deleteComment(member.getPublicId(), post.getId(), comment.getId());
 
         assertEquals(CommentStatus.DELETED, comment.getStatus());
     }

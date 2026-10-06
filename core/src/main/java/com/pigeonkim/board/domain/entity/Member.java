@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Entity
 @Table(name="members")
 @Getter
@@ -18,20 +20,16 @@ public class Member extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
-    private String password;
+    @Column(updatable = false, nullable = false, unique = true)
+    private UUID publicId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MemberRole role;
 
     @Builder
-    public Member(String email, String password, MemberRole role) {
-        this.email = email;
-        this.password = password;
+    public Member(MemberRole role, UUID publicId) {
         this.role = role;
+        this.publicId = publicId;
     }
 }

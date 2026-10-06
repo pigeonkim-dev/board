@@ -30,7 +30,6 @@ public class ErrorMessages {
             case NOT_POST_AUTHOR,
                  NOT_COMMENT_AUTHOR    -> "작성자만 수정하거나 삭제할 수 있습니다.";
 
-            case EMAIL_DUPLICATED      -> "이미 사용 중인 이메일입니다.";
             case NICKNAME_DUPLICATED   -> "이미 사용 중인 닉네임입니다.";
 
             case COMMENTS_DISABLED     -> "이 게시글은 댓글을 받지 않습니다.";

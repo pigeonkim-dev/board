@@ -7,6 +7,8 @@ import com.pigeonkim.board.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 /**
  * 이메일로 회원을 찾는 조회 전용 컴포넌트.
  *
@@ -17,11 +19,10 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ProfileFinder {
-
     private final ProfileRepository profileRepository;
 
-    public Profile findByMemberEmail(String email) {
-        return profileRepository.findByMemberEmail(email)
+    public  Profile findByMemberPublicId(UUID publicId){
+        return profileRepository.findByMemberPublicId(publicId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PROFILE_NOT_FOUND));
     }
 }

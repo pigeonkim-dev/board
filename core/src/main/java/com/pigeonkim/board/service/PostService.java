@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -22,12 +24,12 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final ProfileFinder profileFinder;
 
-    private Post findOwnedPost(String email, Long postId) {
+    private Post findOwnedPost(UUID publicId, Long postId) {
 
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
 
-        Profile profile = profileFinder.findByMemberEmail(email);
+        Profile profile = profileFinder.findByMemberPublicId(publicId);
 
         if (!post.isAuthor(profile)) {
             throw new BusinessException(ErrorCode.NOT_POST_AUTHOR);
@@ -37,10 +39,10 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostResult> getPosts(Pageable pageable, String email) {
+    public Page<PostResult> getPosts(Pageable pageable, UUID publicId) {
         Page<Post> posts = postRepository.findActivePosts(PostStatus.ACTIVE, pageable);
 
-        Profile profile = email == null ? null : profileFinder.findByMemberEmail(email);
+        Profile profile = publicId == null ? null : profileFinder.findByMemberPublicId(publicId);
 
         return posts.map(post -> {
             long commentCount = commentRepository.countByPostIdAndStatus(post.getId(), CommentStatus.ACTIVE);
@@ -49,20 +51,20 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PostResult getPost(String email, Long postId) {
+    public PostResult getPost(UUID publicId, Long postId) {
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
         long commentCount = commentRepository.countByPostIdAndStatus(postId, CommentStatus.ACTIVE);
 
-        Profile profile = email == null ? null : profileFinder.findByMemberEmail(email);
+        Profile profile = publicId == null ? null : profileFinder.findByMemberPublicId(publicId);
 
         return PostResult.from(post, commentCount, profile);
     }
 
     @Transactional
-    public Long createPost(String email, PostCommand postCommand) {
+    public Long createPost(UUID publicId, PostCommand postCommand) {
 
-        Profile profile = profileFinder.findByMemberEmail(email);
+        Profile profile = profileFinder.findByMemberPublicId(publicId);
 
         Post post = Post.builder()
                 .author(profile)
@@ -77,25 +79,25 @@ public class PostService {
     }
 
     @Transactional
-    public void updatePost(String email, Long postId, PostCommand postCommand) {
+    public void updatePost(UUID publicId, Long postId, PostCommand postCommand) {
 
-        Post post = findOwnedPost(email, postId);
+        Post post = findOwnedPost(publicId, postId);
 
         post.update(postCommand.getTitle(), postCommand.getContent(), postCommand.isCommentsEnabled());
     }
 
     @Transactional
-    public void deletePost(String email, Long postId) {
+    public void deletePost(UUID publicId, Long postId) {
 
-        Post post = findOwnedPost(email, postId);
+        Post post = findOwnedPost(publicId, postId);
 
         post.delete();
     }
 
     @Transactional(readOnly = true)
-    public PostResult getPostForEdit(String email, Long postId) {
+    public PostResult getPostForEdit(UUID publicId, Long postId) {
 
-        Post post = findOwnedPost(email, postId);
+        Post post = findOwnedPost(publicId, postId);
 
         long commentCount = commentRepository.countByPostIdAndStatus(postId, CommentStatus.ACTIVE);
 

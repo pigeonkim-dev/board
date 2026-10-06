@@ -26,7 +26,6 @@ dependencies {
     // spring-boot-starter-security 전체가 아니라 암호화 기능만 든 작은 아티팩트를 쓴다.
     // starter-security 를 넣으면 웹 필터체인·시큐리티 자동설정까지 딸려와
     // "core 는 web 을 모른다"가 무너진다.
-    implementation 'org.springframework.security:spring-security-crypto'
 
     // 스키마는 도메인의 것이므로 마이그레이션 파일도 core 가 갖는다.
     implementation 'org.springframework.boot:spring-boot-flyway'

@@ -4,6 +4,7 @@ import com.pigeonkim.board.domain.entity.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * 지금은 save 만 쓴다. JpaRepository 가 이미 준다.
@@ -13,6 +14,6 @@ import java.util.Optional;
  * 아무도 안 쓰는 것은 만들지 않는다.
  */
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
-    Optional<Profile> findByMemberEmail(String email);
+    Optional<Profile> findByMemberPublicId(UUID publicId);
     boolean existsByNickname(String nickname);
 }

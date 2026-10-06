@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,17 +22,17 @@ public class CommentService {
     private final ProfileFinder profileFinder;
 
     @Transactional(readOnly = true)
-    public List<CommentResult> getComments(Long postId, String email) {
+    public List<CommentResult> getComments(Long postId, UUID publicId) {
 
         List<Comment> commentList = commentRepository.findActiveCommentsByPostId(postId, CommentStatus.ACTIVE);
 
-        Profile profile = email == null ? null : profileFinder.findByMemberEmail(email);
+        Profile profile = publicId == null ? null : profileFinder.findByMemberPublicId(publicId);
 
         return commentList.stream().map((c) -> CommentResult.from(c, profile)).toList();
     }
 
     @Transactional
-    public void createComment(String email, Long postId, String content) {
+    public void createComment(UUID publicId, Long postId, String content) {
 
         // 1. 게시글 존재 확인
         Post post = postRepository.findActiveById(postId, PostStatus.ACTIVE)
@@ -42,7 +43,7 @@ public class CommentService {
             throw new BusinessException(ErrorCode.COMMENTS_DISABLED);
         }
 
-        Profile profile = profileFinder.findByMemberEmail(email);
+        Profile profile = profileFinder.findByMemberPublicId(publicId);
 
         Comment comment = Comment.builder()
                 .post(post)
@@ -54,7 +55,7 @@ public class CommentService {
     }
 
     @Transactional
-    public void updateComment(String email, Long postId, Long commentId, String content) {
+    public void updateComment(UUID publicId, Long postId, Long commentId, String content) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
@@ -67,7 +68,7 @@ public class CommentService {
             throw new BusinessException(ErrorCode.POST_COMMENT_MISMATCH);
         }
 
-        Profile profile = profileFinder.findByMemberEmail(email);
+        Profile profile = profileFinder.findByMemberPublicId(publicId);
 
         if (!comment.isAuthor(profile)) {
             throw new BusinessException(ErrorCode.NOT_COMMENT_AUTHOR);
@@ -82,7 +83,7 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(String email, Long postId, Long commentId) {
+    public void deleteComment(UUID publicId, Long postId, Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
 
@@ -94,7 +95,7 @@ public class CommentService {
             throw new BusinessException(ErrorCode.POST_DELETED);
         }
 
-        Profile profile = profileFinder.findByMemberEmail(email);
+        Profile profile = profileFinder.findByMemberPublicId(publicId);
 
         if (!comment.isAuthor(profile)) {
             throw new BusinessException(ErrorCode.NOT_COMMENT_AUTHOR);
