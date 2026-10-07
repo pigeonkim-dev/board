@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
@@ -85,6 +87,24 @@ class MemberControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("signup"))
                 .andExpect(model().attributeHasErrors("profileSetupRequest"));
+    }
+
+    @Test
+    void signup_막혔던_주소로_돌아간다() throws Exception {
+
+        UUID uuid = UUID.randomUUID();
+        MvcResult blocked = mockMvc.perform(get("/board/posts/new").with(TestUsers.unregistered(uuid)))
+                .andExpect(redirectedUrl("/signup")).andReturn();
+        MockHttpSession session = (MockHttpSession) blocked.getRequest().getSession();
+
+        mockMvc.perform(
+                post("/signup")
+                        .session(session)
+                        .with(TestUsers.unregistered(uuid))
+                        .with(csrf())
+                        .param("nickname", "tester"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("http://localhost/board/posts/new?continue"));
     }
 
     @Test

@@ -20,33 +20,26 @@ public class BoardOidcUserService extends OidcUserService {
     private final MemberRepository memberRepository;
     private final ProfileFinder profileFinder;
 
-    public BoardOidcUser reload(BoardOidcUser current){
-        UUID publicId = current.getPublicId();
-        Optional<Member> member = memberRepository.findByPublicId(publicId);
-
-        if (member.isEmpty()){
-            return BoardOidcUser.ofUnregistered(current);
-        }
-
-        Profile profile = profileFinder.findByMemberPublicId(publicId);
-
-        return BoardOidcUser.ofRegistered(current, member.get(), profile);
-    }
-
-    @Override
-    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
-        OidcUser oidcUser = super.loadUser(userRequest);
-
+    private BoardOidcUser toBoardUser(OidcUser oidcUser) {
         UUID publicId = UUID.fromString(oidcUser.getSubject());
-
         Optional<Member> member = memberRepository.findByPublicId(publicId);
 
-        if (member.isEmpty()){
+        if (member.isEmpty()) {
             return BoardOidcUser.ofUnregistered(oidcUser);
         }
 
         Profile profile = profileFinder.findByMemberPublicId(publicId);
 
         return BoardOidcUser.ofRegistered(oidcUser, member.get(), profile);
+    }
+
+    public BoardOidcUser reload(BoardOidcUser current) {
+        return toBoardUser(current);
+    }
+
+    @Override
+    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
+        OidcUser oidcUser = super.loadUser(userRequest);
+        return toBoardUser(oidcUser);
     }
 }

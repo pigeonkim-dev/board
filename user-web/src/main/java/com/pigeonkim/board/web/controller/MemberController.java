@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,18 +22,20 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
-
-// 회원 가입. GET /signup 폼, POST /signup 제출. 가입이 Member 를 만드는 일이라 여기 둔다.
 @Controller
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
     private final ErrorMessages errorMessages;
     private final LoginRefresher loginRefresher;
+    private final RequestCache requestCache;
 
+    // TODO 손질-4  두 메서드의 @AuthenticationPrincipal 을 @AuthenticationPrincipal(errorOnInvalidType = true) 로.
+    //   기본값 false 는 principal 이 BoardOidcUser 가 아니면 조용히 null 을 넣는다 → 다음 줄 user.isRegistered() 에서 NPE.
+    //   true 면 그 자리에서 "타입이 다르다" 는 예외가 나서 원인이 보인다. (10/4 에 실제로 겪은 silent null)
     @GetMapping("/signup")
-    public String signupForm(@AuthenticationPrincipal BoardOidcUser user, Model model) {
+    public String signupForm(@AuthenticationPrincipal(errorOnInvalidType = true) BoardOidcUser user,
+                             Model model) {
 
         if (user.isRegistered()) {
             return "redirect:/";
@@ -43,14 +47,13 @@ public class MemberController {
     }
 
 
-
     @PostMapping("/signup")
-    public String signup(@AuthenticationPrincipal BoardOidcUser user,
-                                 @Valid @ModelAttribute ProfileSetupRequest profileSetupRequest,
-                                 BindingResult bindingResult,
-                                 RedirectAttributes redirectAttributes,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response) {
+    public String signup(@AuthenticationPrincipal(errorOnInvalidType = true) BoardOidcUser user,
+                         @Valid @ModelAttribute ProfileSetupRequest profileSetupRequest,
+                         BindingResult bindingResult,
+                         RedirectAttributes redirectAttributes,
+                         HttpServletRequest request,
+                         HttpServletResponse response) {
 
         if (user.isRegistered()) {
             return "redirect:/";
@@ -73,7 +76,15 @@ public class MemberController {
         }
 
         loginRefresher.refresh(request, response);
+
         redirectAttributes.addFlashAttribute("message", "가입이 완료되었습니다.");
+
+        SavedRequest savedRequest = requestCache.getRequest(request, response);
+
+        if (savedRequest != null) {
+            requestCache.removeRequest(request, response);
+            return "redirect:" + savedRequest.getRedirectUrl();
+        }
 
         return "redirect:/";
     }

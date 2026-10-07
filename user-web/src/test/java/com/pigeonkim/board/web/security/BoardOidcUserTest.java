@@ -3,16 +3,7 @@ package com.pigeonkim.board.web.security;
 import com.pigeonkim.board.domain.MemberRole;
 import com.pigeonkim.board.domain.entity.Member;
 import com.pigeonkim.board.domain.entity.Profile;
-import com.pigeonkim.board.domain.MemberRole;
-import com.pigeonkim.board.domain.entity.Member;
-import com.pigeonkim.board.domain.entity.Profile;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.UUID;
@@ -37,7 +28,7 @@ class BoardOidcUserTest {
 
     @Test
     void ofUnregistered_권한이_비어있다() {
-        
+
         UUID uuid = UUID.randomUUID();
         BoardOidcUser user = TestUsers.unregisteredUser(uuid);
 

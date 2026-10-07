@@ -27,7 +27,7 @@ spring:
             client-authentication-method: client_secret_basic
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            scope: openid, profile
+            scope: openid   # profile 은 뺐다 — IdP 가 profile 에 채우는 클레임이 없다 (10/4 확인). 받는 것은 sub 하나
         provider:
           board:
             authorization-uri: http://127.0.0.1:9000/oauth2/authorize

@@ -12,11 +12,12 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.web.savedrequest.RequestCache;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final  BoardOidcUserService boardOidcUserService;
+    private final BoardOidcUserService boardOidcUserService;
     private final SignupRequiredAccessDeniedHandler signupRequiredAccessDeniedHandler;
     private final SignupRedirectSuccessHandler signupRedirectSuccessHandler;
 
@@ -29,7 +30,7 @@ public class SecurityConfig {
     }
 
     private OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler(
-            ClientRegistrationRepository clientRegistrationRepository    ) {
+            ClientRegistrationRepository clientRegistrationRepository) {
 
         OidcClientInitiatedLogoutSuccessHandler handler = new OidcClientInitiatedLogoutSuccessHandler(
                 clientRegistrationRepository
@@ -39,12 +40,16 @@ public class SecurityConfig {
         return handler;
 
     }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
-                                           ClientRegistrationRepository clientRegistrationRepository) throws Exception {
+                                           ClientRegistrationRepository clientRegistrationRepository,
+                                           RequestCache requestCache) throws Exception {
         http
                 .securityContext(context -> context
                         .securityContextRepository(securityContextRepository()))
+                .requestCache(cache ->
+                        cache.requestCache(requestCache))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login",
                                 "/css/**", "/js/**", "/images/**").permitAll()
