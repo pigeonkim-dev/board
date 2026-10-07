@@ -1,0 +1,5 @@
+/* 관리자 사이트는 어두운 navbar 로 사용자 사이트와 한눈에 구분한다. */
+body { font-family: Pretendard, system-ui, sans-serif; background: #f4f5f7; }
+.admin-nav { background: #1f2933; }
+.admin-nav .navbar-brand, .admin-nav .nav-link { color: #f8f9fa; }
+.admin-footer { color: #6c757d; font-size: .875rem; }

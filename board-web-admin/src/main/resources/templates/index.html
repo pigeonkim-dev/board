@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('홈')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-4">
+    <h1 class="h4">관리자 홈</h1>
+    <p class="text-secondary">P2-1 확인용. 로그인되어 있으면 위 navbar 에 이름이 보인다. 게시판 관리는 P3 에서 여기 붙는다.</p>
+    <dl class="row small" sec:authorize="isAuthenticated()" th:with="p=${#authentication.principal}">
+        <dt class="col-sm-2">sub</dt>        <dd class="col-sm-10" th:text="${#authentication.name}">-</dd>
+        <dt class="col-sm-2">registered</dt> <dd class="col-sm-10" th:text="${p.registered}">-</dd>
+        <dt class="col-sm-2">role</dt>       <dd class="col-sm-10" th:text="${p.role}">-</dd>
+    </dl>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

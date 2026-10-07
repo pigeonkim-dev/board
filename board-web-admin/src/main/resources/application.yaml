@@ -1,0 +1,45 @@
+# admin-web — 관리자 사이트. user-web 과 다른 것은 포트·쿠키 이름·IdP 등록 이름 셋뿐이다.
+server:
+  port: 8081
+  servlet:
+    session:
+      cookie:
+        name: ADMINSESSION
+
+board:
+  oauth2:
+    registration-id: board-admin
+
+spring:
+  profiles:
+    default: dev
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    open-in-view: false
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+  security:
+    oauth2:
+      client:
+        registration:
+          # 등록 이름 = IdP 쪽 redirectUri 의 마지막 조각(/login/oauth2/code/board-admin)과 같아야 한다
+          board-admin:
+            client-id: board-admin-client
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid

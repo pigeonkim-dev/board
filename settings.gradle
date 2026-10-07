@@ -1,6 +1,7 @@
 rootProject.name = 'board'
 
 // 여기 적힌 것만 Gradle 이 모듈로 인식한다.
-// admin-web 은 B9-1 에서 한 줄 더 넣는다. 지금 만들면 6개월간 빈 모듈이다.
-include 'core'
-include 'user-web'
+include 'board-core'
+include 'board-web-common'   // 두 웹 모듈이 같이 쓰는 부품 (OIDC principal, 핸들러, 리졸버, 공통 설정). 2026-10-07 P2-1
+include 'board-web-user'
+include 'board-web-admin'    // 관리자 사이트. 8081, 쿠키 ADMINSESSION, 등록 board-admin
