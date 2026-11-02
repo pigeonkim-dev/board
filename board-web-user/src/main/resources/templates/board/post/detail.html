@@ -1,131 +1,141 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head(${post.title})}"></head>
 <body>
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<header th:replace="~{fragments/layout :: navbar}"></header>
 
-<main class="container py-4">
-    <div class="app-card p-4 mb-4">
-        <h1 class="h3 mb-2" th:text="${post.title}"></h1>
-        <div class="text-secondary small mb-3">
-            <span th:text="${post.authorNickname}"></span> ·
-            <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-            <span th:if="${post.createdAt != post.updatedAt}"> · 수정됨</span>
+<main class="mx-auto max-w-3xl px-4 py-8">
+    <a class="meta no-underline hover:text-ink" th:href="@{/board/posts(page=${page})}">게시글 목록</a>
+
+    <article class="mt-4">
+        <h1 class="text-3xl leading-snug sm:text-4xl" th:text="${post.title}">제목</h1>
+        <p class="meta mt-3 flex flex-wrap gap-x-3">
+            <span class="text-ink-sub" th:text="${post.authorNickname}">작성자</span>
+            <time th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2026-10-29 12:00</time>
+            <span th:if="${post.createdAt != post.updatedAt}">수정됨</span>
+        </p>
+
+        <div class="mt-6 border-t border-line pt-6">
+            <!-- 읽기 좋은 줄 길이(한글 40자 남짓)로 묶는다 -->
+            <p class="post-body max-w-[65ch]" th:text="${post.content}">본문</p>
         </div>
-        <hr/>
-        <p class="post-content mb-0" th:text="${post.content}"></p>
-    </div>
+    </article>
 
-    <div class="d-flex gap-2 mb-4">
-        <a class="btn btn-outline-secondary" th:href="@{/board/posts(page=${page})}">목록</a>
-        <a class="btn btn-outline-primary" th:if="${post.canEdit}"
+    <div class="mt-8 flex flex-wrap gap-2">
+        <a class="btn btn-outline" th:href="@{/board/posts(page=${page})}">목록</a>
+        <a class="btn btn-outline" th:if="${post.canEdit}"
            th:href="@{/board/posts/{id}/edit(id=${post.id}, page=${page})}">수정</a>
         <form th:if="${post.canDelete}" th:method="POST"
               th:action="@{/board/posts/{id}/delete(id=${post.id})}"
-              onsubmit="return confirm('삭제하시겠습니까?')">
+              onsubmit="return confirm('이 글을 삭제할까요?')">
             <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <input type="hidden" name="page" th:value="${page}"/>
-            <button type="submit" class="btn btn-outline-danger">삭제</button>
+            <button type="submit" class="btn btn-danger">삭제</button>
         </form>
     </div>
 
     <!-- 댓글 영역 -->
-    <div class="app-card p-4" th:if="${post.commentsEnabled}">
-        <h2 class="h5 mb-3">댓글 <span class="text-secondary" th:text="${post.commentCount}"></span></h2>
+    <section class="card mt-10 p-5 sm:p-6" th:if="${post.commentsEnabled}" aria-labelledby="comments-title">
+        <h2 id="comments-title" class="text-lg font-semibold">
+            댓글 <span class="text-ink-muted tabular-nums" th:text="${post.commentCount}">0</span>
+        </h2>
 
-        <div th:if="${commentError}" class="alert alert-danger py-2" th:text="${commentError}"></div>
+        <div th:if="${commentError}" class="alert alert-danger mt-4" th:text="${commentError}"></div>
 
-        <p th:if="${comments.empty}" class="text-secondary small">첫 댓글을 남겨보세요.</p>
+        <p th:if="${comments.empty}" class="meta mt-4">첫 댓글을 남겨 보세요.</p>
 
-        <div class="comment-item py-3" th:each="comment : ${comments}">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <strong th:text="${comment.authorNickname}"></strong>
-                    <span class="text-secondary small ms-1"
-                          th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-                    <span class="text-secondary small"
-                          th:if="${comment.createdAt != comment.updatedAt}">(수정됨)</span>
+        <ul class="mt-2 divide-y divide-line-soft" th:unless="${comments.empty}">
+            <li class="py-4" th:each="comment : ${comments}">
+                <div class="flex items-start justify-between gap-4">
+                    <p class="flex flex-wrap items-baseline gap-x-2">
+                        <strong class="font-semibold" th:text="${comment.authorNickname}">작성자</strong>
+                        <time class="meta" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}"></time>
+                        <span class="meta" th:if="${comment.createdAt != comment.updatedAt}">수정됨</span>
+                    </p>
+
+                    <!-- 'hidden' 을 넣고 빼는 상자와 'flex' 상자를 나눈다. 둘 다 display 를 정해서 한 요소에 같이 두면 어느 쪽이 이길지 CSS 순서에 달린다 -->
+                    <div class="shrink-0" th:id="'comment-actions-' + ${comment.id}"><div class="flex gap-3">
+                        <button type="button" th:if="${comment.canEdit}" class="text-action"
+                                th:attr="data-comment-id=${comment.id}"
+                                onclick="startCommentEdit(this.dataset.commentId)">수정</button>
+                        <form th:if="${comment.canDelete}" th:method="POST"
+                              th:action="@{/board/posts/{postId}/comments/{commentId}/delete(postId=${post.id}, commentId=${comment.id})}"
+                              onsubmit="return confirm('이 댓글을 삭제할까요?')">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <input type="hidden" name="page" th:value="${page}"/>
+                            <button type="submit" class="text-action">삭제</button>
+                        </form>
+                    </div></div>
                 </div>
 
-                <div class="d-flex gap-2" th:id="'comment-actions-' + ${comment.id}">
-                    <button type="button" th:if="${comment.canEdit}"
-                            class="btn btn-sm btn-link text-secondary p-0"
-                            th:attr="data-comment-id=${comment.id}"
-                            onclick="startCommentEdit(this.dataset.commentId)">수정</button>
-                    <form th:if="${comment.canDelete}" th:method="POST"
-                          th:action="@{/board/posts/{postId}/comments/{commentId}/delete(postId=${post.id}, commentId=${comment.id})}"
-                          onsubmit="return confirm('댓글을 삭제하시겠습니까?')">
-                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-                        <input type="hidden" name="page" th:value="${page}"/>
-                        <button type="submit" class="btn btn-sm btn-link text-secondary p-0">삭제</button>
-                    </form>
-                </div>
-            </div>
+                <!-- 보기 모드 -->
+                <p class="post-body mt-1.5 text-base"
+                   th:id="'comment-view-' + ${comment.id}"
+                   th:text="${comment.content}"></p>
 
-            <!-- 보기 모드 -->
-            <p class="post-content mb-0 mt-1"
-               th:id="'comment-view-' + ${comment.id}"
-               th:text="${comment.content}"></p>
-
-            <!-- 편집 모드 -->
-            <form th:if="${comment.canEdit}" class="mt-2 d-none"
-                  th:id="'comment-edit-' + ${comment.id}"
-                  th:method="POST"
-                  th:action="@{/board/posts/{postId}/comments/{commentId}/edit(postId=${post.id}, commentId=${comment.id})}">
-                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-                <input type="hidden" name="page" th:value="${page}"/>
-                <textarea name="content" class="form-control form-control-sm mb-2" rows="3"
-                          th:text="${comment.content}"></textarea>
-                <button type="submit" class="btn btn-primary btn-sm">저장</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm"
-                        th:attr="data-comment-id=${comment.id}"
-                        onclick="cancelCommentEdit(this.dataset.commentId)">취소</button>
-            </form>
-        </div>
+                <!-- 편집 모드. 처음엔 숨겨 두고 '수정'을 누르면 보기 모드와 자리를 바꾼다 -->
+                <form th:if="${comment.canEdit}" class="mt-3 hidden"
+                      th:id="'comment-edit-' + ${comment.id}"
+                      th:method="POST"
+                      th:action="@{/board/posts/{postId}/comments/{commentId}/edit(postId=${post.id}, commentId=${comment.id})}">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                    <input type="hidden" name="page" th:value="${page}"/>
+                    <label class="sr-only" th:for="'comment-edit-content-' + ${comment.id}">댓글 수정</label>
+                    <textarea name="content" class="input" rows="3"
+                              th:id="'comment-edit-content-' + ${comment.id}"
+                              th:text="${comment.content}"></textarea>
+                    <div class="mt-2 flex gap-2">
+                        <button type="submit" class="btn btn-primary px-3 py-2 text-sm">저장</button>
+                        <button type="button" class="btn btn-outline px-3 py-2 text-sm"
+                                th:attr="data-comment-id=${comment.id}"
+                                onclick="cancelCommentEdit(this.dataset.commentId)">취소</button>
+                    </div>
+                </form>
+            </li>
+        </ul>
 
         <!-- 댓글 작성 -->
-        <form class="mt-3" sec:authorize="isAuthenticated()" th:method="POST"
+        <form class="mt-4 border-t border-line-soft pt-5" sec:authorize="isAuthenticated()" th:method="POST"
               th:action="@{/board/posts/{postId}/comments(postId=${post.id})}"
               th:object="${commentRequest}">
             <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <input type="hidden" name="page" th:value="${page}"/>
-            <div class="mb-2">
-                <label for="commentContent" class="form-label visually-hidden">댓글</label>
-                <textarea id="commentContent" class="form-control" th:field="*{content}"
-                          rows="3" placeholder="댓글을 입력하세요 (500자 이내)"></textarea>
-                <div class="text-danger small mt-1"
-                     th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-sm">댓글 작성</button>
+            <label for="commentContent" class="field-label">댓글 쓰기</label>
+            <textarea id="commentContent" class="input" th:field="*{content}"
+                      th:classappend="${#fields.hasErrors('content')} ? 'field-error'"
+                      rows="3" placeholder="500자 이내"></textarea>
+            <p class="mt-1 text-sm text-danger"
+               th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></p>
+            <button type="submit" class="btn btn-primary mt-3">댓글 등록</button>
         </form>
-        <p class="text-secondary small mt-3 mb-0" sec:authorize="isAnonymous()">
-            댓글을 작성하려면 <a th:href="@{/login}">로그인</a>하세요.
+        <p class="meta mt-5" sec:authorize="isAnonymous()">
+            댓글을 쓰려면 <a th:href="@{/login}">로그인</a>하세요.
         </p>
-    </div>
+    </section>
 
-    <div class="app-card p-4 text-secondary" th:unless="${post.commentsEnabled}">
-        이 게시글은 댓글을 받지 않습니다.
-    </div>
+    <p class="card mt-10 p-5 text-ink-sub" th:unless="${post.commentsEnabled}">
+        이 글은 댓글을 받지 않습니다.
+    </p>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 <script>
   function startCommentEdit(id) {
-    document.getElementById('comment-view-' + id).classList.add('d-none');
-    document.getElementById('comment-actions-' + id).classList.add('d-none');
+    document.getElementById('comment-view-' + id).classList.add('hidden');
+    document.getElementById('comment-actions-' + id).classList.add('hidden');
     var form = document.getElementById('comment-edit-' + id);
-    form.classList.remove('d-none');
+    form.classList.remove('hidden');
     form.querySelector('textarea').focus();
   }
 
   function cancelCommentEdit(id) {
     var form = document.getElementById('comment-edit-' + id);
-    form.classList.add('d-none');
+    form.classList.add('hidden');
     form.querySelector('textarea').value = form.dataset.original;
-    document.getElementById('comment-view-' + id).classList.remove('d-none');
-    document.getElementById('comment-actions-' + id).classList.remove('d-none');
+    document.getElementById('comment-view-' + id).classList.remove('hidden');
+    document.getElementById('comment-actions-' + id).classList.remove('hidden');
   }
 
   // 취소했을 때 되돌릴 원본을 각 폼에 기억시켜 둔다

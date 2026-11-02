@@ -108,6 +108,24 @@ class MemberControllerTest {
     }
 
     @Test
+    void signup_브라우저자동요청은_돌아갈주소가_아니다() throws Exception {
+
+        UUID uuid = UUID.randomUUID();
+        MvcResult blocked = mockMvc.perform(get("/favicon.ico").with(TestUsers.unregistered(uuid)))
+                .andExpect(redirectedUrl("/signup")).andReturn();
+        MockHttpSession session = (MockHttpSession) blocked.getRequest().getSession();
+
+        mockMvc.perform(
+                post("/signup")
+                        .session(session)
+                        .with(TestUsers.unregistered(uuid))
+                        .with(csrf())
+                        .param("nickname", "tester"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+    }
+
+    @Test
     void signupForm_가입한사람_홈으로() throws Exception {
         Member member = Member.builder().role(MemberRole.USER).publicId(UUID.randomUUID()).build();
         Profile profile = Profile.builder().member(member).nickname("tester").build();

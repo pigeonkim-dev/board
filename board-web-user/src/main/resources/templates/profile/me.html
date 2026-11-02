@@ -1,41 +1,36 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('내 정보')}"></head>
 <body>
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<header th:replace="~{fragments/layout :: navbar}"></header>
 
-<main class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="app-card p-4">
-                <h1 class="h4 mb-4">내 정보</h1>
+<main class="mx-auto max-w-xl px-4 py-8">
+    <h1 class="text-3xl">내 정보</h1>
 
-                <!-- 리다이렉트하면서 넘어온 일회성 메시지. 새로고침하면 사라진다. -->
-                <div class="alert alert-success py-2" th:if="${message}" th:text="${message}"></div>
+    <!-- 리다이렉트하면서 넘어온 일회성 메시지. 새로고침하면 사라진다. -->
+    <div class="alert alert-ok mt-6" th:if="${message}" th:text="${message}"></div>
 
-                <dl class="row mb-0">
-                    <dt class="col-sm-3 text-secondary fw-normal">닉네임</dt>
-                    <dd class="col-sm-9" th:text="${profile.nickname}">닉네임</dd>
-
-                    <dt class="col-sm-3 text-secondary fw-normal">자기소개</dt>
-                    <dd class="col-sm-9 mb-0">
-                        <!-- 줄바꿈을 그대로 보여주려면 pre-wrap 이 필요하다.
-                             th:text 는 HTML 을 이스케이프하므로 <br> 로는 안 된다. -->
-                        <span th:if="${!#strings.isEmpty(profile.bio)}"
-                              th:text="${profile.bio}" style="white-space: pre-wrap;">소개</span>
-                        <span th:if="${#strings.isEmpty(profile.bio)}"
-                              class="text-secondary">아직 작성하지 않았습니다.</span>
-                    </dd>
-                </dl>
-
-
-                <hr class="my-4"/>
-
-                <a class="btn btn-primary" th:href="@{/profile/me/edit}">수정</a>
-                <a class="btn btn-outline-secondary" th:href="@{/board/posts}">목록으로</a>
-            </div>
+    <dl class="card mt-6 divide-y divide-line-soft">
+        <div class="grid gap-1 px-5 py-4 sm:grid-cols-[7rem_1fr] sm:gap-4">
+            <dt class="text-sm text-ink-sub">닉네임</dt>
+            <dd class="font-semibold" th:text="${profile.nickname}">닉네임</dd>
         </div>
+        <div class="grid gap-1 px-5 py-4 sm:grid-cols-[7rem_1fr] sm:gap-4">
+            <dt class="text-sm text-ink-sub">자기소개</dt>
+            <dd>
+                <!-- 줄바꿈을 그대로 보여주려면 pre-wrap 이 필요하다. th:text 는 HTML 을 이스케이프하므로 <br> 로는 안 된다. -->
+                <span class="whitespace-pre-wrap leading-relaxed"
+                      th:if="${!#strings.isEmpty(profile.bio)}" th:text="${profile.bio}">소개</span>
+                <span class="text-ink-muted"
+                      th:if="${#strings.isEmpty(profile.bio)}">아직 쓰지 않았습니다.</span>
+            </dd>
+        </div>
+    </dl>
+
+    <div class="mt-6 flex gap-2">
+        <a class="btn btn-primary" th:href="@{/profile/me/edit}">내 정보 수정</a>
+        <a class="btn btn-outline" th:href="@{/board/posts}">게시판으로</a>
     </div>
 </main>
 

@@ -1,0 +1,133 @@
+/*
+ * IdP 와 board 가 같이 쓰는 테마 (2026-10-20, 2026-10-29 어두운 테마로 바꿈). 두 사이트가 한 가족으로 보이게 하는 공통 값과 공통 부품.
+ *
+ * 원본은 이 파일 하나다. 각 저장소에는 복사본을 커밋한다.
+ *   IdP   : OAuth2-SpringAuthorizationServer/code/src/main/css/tailwind/theme.css
+ *   board : board/code/board-web-common/src/main/css/tailwind/theme.css
+ * 이 파일을 고치면 Claude 가 복사본을 모두 이 내용으로 덮는다. 복사본은 직접 고치지 않는다.
+ * 저장소가 이 파일을 직접 가리키지 않는 이유: 저장소만 받은 곳(다른 컴퓨터, 면접관)에서도 빌드가 돼야 한다.
+ *
+ * 들어 있는 것
+ *   @theme             색, 글꼴. 여기 적은 이름이 그대로 Tailwind 클래스가 된다
+ *                      (--color-brand 를 적으면 bg-brand, text-brand, border-brand 가 생긴다)
+ *   @layer base        모든 화면의 바탕 (배경, 글자색, 한글 줄바꿈, 제목 글꼴)
+ *   @layer components  두 사이트에 다 있는 부품 (버튼, 입력칸, 라벨, 카드, 알림 띠)
+ *
+ * 화면 배치(여백, 열, 너비)는 여기 두지 않는다. 각 화면이 Tailwind 클래스로 직접 쓴다.
+ *
+ * 색 (2026-10-29 사용자 지정): 메인 = 검정·남색·짙은 파랑, 서브 = 흰색·은색·회색.
+ *   검정 바탕(page) 위에 남색 카드(surface)를 올리고, 가장 중요한 버튼만 짙은 파랑(brand)에 은색 그림자를 단다.
+ *   bg-white 를 화면에 직접 쓰지 않는다. 바탕은 bg-page, 카드·띠는 bg-surface 다.
+ *
+ * 글꼴은 이 파일이 싣지 않는다. 각 사이트의 <head> 가 CDN 링크로 둘 다 싣는다.
+ *   Pretendard      본문         https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css
+ *   Black Han Sans  제목(h1)·로고  https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap
+ */
+
+@theme {
+    --font-sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", system-ui, sans-serif;
+    --font-display: "Black Han Sans", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+
+    --color-brand: #2450d8;      /* 짙은 파랑. 가장 중요한 버튼 */
+    --color-brand-dark: #1c41b3; /* 그 버튼에 마우스를 올렸을 때 */
+    --color-silver: #c3c8d2;     /* 은색. 가장 중요한 버튼의 그림자, 입력칸을 눌렀을 때의 테두리 */
+
+    --color-page: #08090c;       /* 검정. 화면 바탕 */
+    --color-surface: #111a2e;    /* 남색. 카드, 상단 띠, 알림 상자 */
+    --color-ink: #ffffff;        /* 본문 글자 */
+    --color-ink-sub: #c3c8d2;    /* 라벨 같은 보조 글자 (은색) */
+    --color-ink-muted: #8a91a0;  /* 안내, 꼬리말 같은 흐린 글자 (회색) */
+    --color-line: #2a3550;       /* 입력칸, 버튼 테두리 */
+    --color-line-soft: #1c2640;  /* 카드 안 구분선 */
+
+    --color-danger: #f05252;
+    --color-danger-bg: #3a1c22;
+    --color-danger-ink: #ffb4bf;
+    --color-ok-bg: #12301f;
+    --color-ok-ink: #8fe3b4;
+    --color-warn-bg: #33270f;
+    --color-warn-ink: #f7d48b;
+}
+
+@layer base {
+    html {
+        /* 브라우저가 그리는 것(스크롤바, 자동완성 배경, 날짜 칸)도 어두운 쪽으로 */
+        color-scheme: dark;
+    }
+    body {
+        @apply bg-page font-sans text-ink antialiased;
+        /* 한글을 단어 가운데서 자르지 않는다. 한 줄에 안 들어가는 긴 낱말(이메일 주소)만 넘치는 자리에서 자른다.
+           anywhere 를 쓰지 않는다 — 표의 칸 너비를 글자 하나만큼 줄여 버려 "Google" 이 "Googl / e" 로 잘린다 */
+        word-break: keep-all;
+        overflow-wrap: break-word;
+    }
+    /* 화면 제목은 두꺼운 제목 글꼴. 굵기가 글꼴에 이미 들어 있어 font-bold 를 겹쳐 쓰면 브라우저가 한 번 더 굵힌다 */
+    h1 {
+        @apply font-display font-normal tracking-wide;
+    }
+    /* 링크는 흰 글자에 은색 밑줄. 파랑은 버튼에만 써서 "누를 곳"이 하나로 보이게 한다 */
+    a {
+        @apply text-ink underline decoration-silver/50 underline-offset-4 hover:decoration-ink;
+    }
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-silver;
+    }
+}
+
+@layer components {
+    /* 버튼. 모양은 btn, 색은 btn-primary / btn-outline / btn-danger 를 함께 붙인다. <a> 에도 쓴다 */
+    .btn {
+        @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-[10px] px-4 py-3
+               text-base font-semibold no-underline transition
+               disabled:cursor-not-allowed disabled:opacity-50
+               motion-reduce:transition-none;
+    }
+    /* 화면에서 가장 중요한 버튼 하나. 은색 그림자가 붙고, 누르면 그림자 쪽으로 눌려 들어간다 */
+    .btn-primary {
+        @apply bg-brand text-white shadow-[4px_4px_0_var(--color-silver)]
+               hover:bg-brand-dark hover:text-white
+               active:translate-x-1 active:translate-y-1 active:shadow-none;
+    }
+    .btn-outline {
+        @apply border border-line bg-surface text-ink hover:border-silver hover:text-ink;
+    }
+    .btn-danger {
+        @apply bg-danger text-white hover:bg-red-600 hover:text-white;
+    }
+
+    /* 입력칸. 글자를 16px(text-base) 밑으로 내리지 않는다 — 아이폰 사파리가 칸을 누를 때 화면을 확대한다 */
+    .input {
+        @apply block w-full rounded-[10px] border-[1.5px] border-line bg-page px-3.5 py-3 text-base text-ink
+               placeholder:text-ink-muted
+               focus:border-silver focus:ring-3 focus:ring-silver/30 focus:outline-none;
+    }
+    .input.field-error {
+        @apply border-danger focus:ring-danger/30;
+    }
+    /* 외부 로그인이 준 이메일처럼 고칠 수 없는 칸 */
+    .input:read-only {
+        @apply cursor-not-allowed bg-surface text-ink-sub;
+    }
+
+    .field-label {
+        @apply mb-1.5 block text-sm text-ink-sub;
+    }
+
+    .card {
+        @apply rounded-[14px] border border-line bg-surface;
+    }
+
+    /* 화면 위의 알림 띠. 색은 alert-danger / alert-ok / alert-warn 을 함께 붙인다 */
+    .alert {
+        @apply rounded-[10px] border px-4 py-3 text-sm leading-relaxed;
+    }
+    .alert-danger {
+        @apply border-danger/40 bg-danger-bg text-danger-ink;
+    }
+    .alert-ok {
+        @apply border-ok-ink/30 bg-ok-bg text-ok-ink;
+    }
+    .alert-warn {
+        @apply border-warn-ink/30 bg-warn-bg text-warn-ink;
+    }
+}

@@ -1,47 +1,42 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/layout :: head('게시글 작성')}"></head>
+<head th:replace="~{fragments/layout :: head('새 글 쓰기')}"></head>
 <body>
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<header th:replace="~{fragments/layout :: navbar}"></header>
 
-<main class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="app-card p-4">
-                <h1 class="h3 mb-4">게시글 작성</h1>
+<main class="mx-auto max-w-2xl px-4 py-8">
+    <h1 class="text-3xl">새 글 쓰기</h1>
 
-                <form th:method="POST" th:action="@{/board/posts/new}" th:object="${postRequest}">
-                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+    <form class="card mt-6 space-y-5 p-5 sm:p-6" th:method="POST" th:action="@{/board/posts/new}" th:object="${postRequest}">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
 
-                    <div class="mb-3">
-                        <label for="title" class="form-label">제목</label>
-                        <input type="text" id="title" class="form-control"
-                               th:field="*{title}" placeholder="제목을 입력하세요"/>
-                        <div class="text-danger small mt-1"
-                             th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="content" class="form-label">본문</label>
-                        <textarea id="content" class="form-control" th:field="*{content}"
-                                  rows="10" placeholder="본문을 입력하세요"></textarea>
-                        <div class="text-danger small mt-1"
-                             th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
-                    </div>
-
-                    <div class="form-check mb-4">
-                        <input class="form-check-input" type="checkbox" id="commentsEnabled"
-                               th:field="*{commentsEnabled}"/>
-                        <label class="form-check-label" for="commentsEnabled">댓글 허용</label>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">작성</button>
-                    <a class="btn btn-link" th:href="@{/board/posts}">취소</a>
-                </form>
-            </div>
+        <div>
+            <label for="title" class="field-label">제목</label>
+            <input type="text" id="title" class="input" th:field="*{title}"
+                   th:classappend="${#fields.hasErrors('title')} ? 'field-error'"/>
+            <p class="mt-1 text-sm text-danger"
+               th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
         </div>
-    </div>
+
+        <div>
+            <label for="content" class="field-label">본문</label>
+            <textarea id="content" class="input leading-relaxed" th:field="*{content}" rows="12"
+                      th:classappend="${#fields.hasErrors('content')} ? 'field-error'"></textarea>
+            <p class="mt-1 text-sm text-danger"
+               th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></p>
+        </div>
+
+        <label class="flex items-center gap-2.5 text-ink-sub">
+            <input class="checkbox" type="checkbox" th:field="*{commentsEnabled}"/>
+            댓글 받기
+        </label>
+
+        <div class="flex gap-2 pt-1">
+            <button type="submit" class="btn btn-primary">글 올리기</button>
+            <a class="btn btn-outline" th:href="@{/board/posts}">취소</a>
+        </div>
+    </form>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

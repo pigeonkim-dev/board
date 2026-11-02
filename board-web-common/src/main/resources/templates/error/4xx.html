@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!-- 404 를 뺀 400번대 전체. 404 는 error/404.html 이 먼저 잡는다. 주로 잘못된 주소(400)와 만료된 폼 제출(403)이다. -->
+<head th:replace="~{fragments/layout :: head('요청을 처리할 수 없습니다')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar}"></header>
+
+<main class="mx-auto max-w-sm px-4 py-12 sm:py-16">
+    <h1 class="text-3xl">요청을 처리할 수 없습니다</h1>
+    <p class="mt-3 leading-relaxed text-ink-sub">
+        주소가 잘못되었거나, 화면을 오래 열어 두어 요청이 만료되었을 수 있습니다. 화면을 새로 연 뒤 다시 시도해 주세요.
+    </p>
+
+    <div class="mt-6 flex gap-2">
+        <a class="btn btn-primary" th:href="@{/}">홈으로</a>
+        <a class="btn btn-outline" href="javascript:history.back()">이전 화면</a>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,55 @@
+/*
+ * 사용자 사이트(board-web-user, 8080) 화면 CSS 의 입력 파일 (2026-10-29).
+ * Tailwind CLI 가 이 파일과 아래 @source 의 파일들을 읽어, 실제로 쓴 클래스만 담은 CSS 하나를 만든다.
+ * 만드는 것은 루트 build.gradle 의 tailwindCss 작업이고, 결과는 jar 안의 /static/css/app.css 가 된다.
+ *
+ * theme.css 는 board-web-common 에 하나만 둔다. ~/life/my/job/dev/common/theme.css 의 복사본이다. 여기서 고치지 않는다.
+ */
+
+/* source(none): 폴더 전체를 훑는 자동 탐색을 끄고, 아래 @source 로 적은 곳만 훑는다 */
+@import "tailwindcss" source(none);
+@import "../../../../../board-web-common/src/main/css/tailwind/theme.css";
+
+@source "../../resources/templates";
+/* 로그인·오류 화면은 web-common 에 있고 두 사이트가 같이 쓴다 */
+@source "../../../../../board-web-common/src/main/resources/templates";
+
+/* 이 사이트에만 있는 부품 */
+@layer components {
+    /* 사이트 이름. 제목 글꼴에 파란 그림자 — IdP 의 로고와 같은 모양이라 두 사이트가 한 가족으로 보인다 */
+    .logo {
+        @apply font-display text-2xl tracking-wide text-ink no-underline [text-shadow:2px_2px_0_var(--color-brand)];
+    }
+    /* 상단 띠의 메뉴 글자. 폰에서 세로로 펼쳐질 때 누를 자리가 넉넉하게 위아래 여백을 준다 */
+    .nav-link {
+        @apply py-2 text-[15px] text-ink-sub no-underline hover:text-ink sm:py-0;
+    }
+
+    /* 화면 제목 줄 아래의 작성자·날짜 같은 흐린 글 */
+    .meta {
+        @apply text-sm text-ink-muted;
+    }
+    /* 글 본문·댓글. 쓴 사람의 줄바꿈을 그대로 보인다 (th:text 는 <br> 을 만들지 않는다) */
+    .post-body {
+        @apply whitespace-pre-wrap text-[17px] leading-[1.8];
+    }
+
+    /* 댓글의 수정·삭제처럼 버튼 모양이 필요 없는 작은 동작 */
+    .text-action {
+        @apply cursor-pointer text-sm text-ink-muted underline decoration-transparent underline-offset-4
+               hover:text-ink hover:decoration-silver;
+    }
+
+    /* 체크박스. 브라우저 기본 모양을 두고 크기와 색만 맞춘다 */
+    .checkbox {
+        @apply size-5 accent-brand;
+    }
+
+    /* 목록 아래 이전·다음 */
+    .page-link {
+        @apply rounded-[10px] border border-line bg-surface px-4 py-2 text-sm text-ink no-underline hover:border-silver;
+    }
+    .page-link.disabled {
+        @apply pointer-events-none opacity-40;
+    }
+}

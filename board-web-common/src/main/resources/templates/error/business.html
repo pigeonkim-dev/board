@@ -1,20 +1,17 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/layout :: head('오류')}"></head>
+<head th:replace="~{fragments/layout :: head('요청을 처리하지 못했습니다')}"></head>
 <body>
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<header th:replace="~{fragments/layout :: navbar}"></header>
 
-<main class="container">
-    <div class="auth-wrap text-center">
-        <div class="app-card p-5">
-            <h1 class="h4 mb-3">⚠️ 오류가 발생했습니다</h1>
-            <p class="text-danger" th:text="${errorMessage}"></p>
-            <div class="mt-4 d-flex gap-2 justify-content-center">
-                <a class="btn btn-primary" th:href="@{/}">홈으로</a>
-                <a class="btn btn-outline-secondary" href="javascript:history.back()">이전 페이지</a>
-            </div>
-        </div>
+<main class="mx-auto max-w-sm px-4 py-12 sm:py-16">
+    <h1 class="text-3xl">요청을 처리하지 못했습니다</h1>
+    <div class="alert alert-danger mt-6" th:text="${errorMessage}">이유</div>
+
+    <div class="mt-6 flex gap-2">
+        <a class="btn btn-primary" th:href="@{/}">홈으로</a>
+        <a class="btn btn-outline" href="javascript:history.back()">이전 화면</a>
     </div>
 </main>
 

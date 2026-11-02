@@ -1,51 +1,48 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('내 정보 수정')}"></head>
 <body>
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<header th:replace="~{fragments/layout :: navbar}"></header>
 
-<main class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="app-card p-4">
-                <h1 class="h4 mb-4">내 정보 수정</h1>
+<main class="mx-auto max-w-xl px-4 py-8">
+    <h1 class="text-3xl">내 정보 수정</h1>
 
-                <form th:method="POST" th:action="@{/profile/me/edit}"
-                      th:object="${profileUpdateRequest}">
-                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+    <form class="card mt-6 space-y-5 p-5 sm:p-6" th:method="POST" th:action="@{/profile/me/edit}"
+          th:object="${profileUpdateRequest}">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
 
-                    <!-- 전역 에러 (닉네임 중복). 가입 폼과 같은 자리, 같은 방식.
-                         #fields 는 th:object 가 걸린 form 안에서만 동작한다. -->
-                    <div class="alert alert-danger py-2" th:if="${#fields.hasGlobalErrors()}">
-                        <p class="mb-0" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="nickname" class="form-label">닉네임</label>
-                        <input type="text" id="nickname" class="form-control" th:field="*{nickname}"
-                               placeholder="닉네임 (2~20자)"/>
-                        <div class="text-danger small mt-1"
-                             th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="bio" class="form-label">자기소개</label>
-                        <textarea id="bio" class="form-control" th:field="*{bio}"
-                                  rows="4" maxlength="256"
-                                  placeholder="256자 이내"></textarea>
-                        <div class="text-danger small mt-1"
-                             th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}"></div>
-                    </div>
-
-                    <!-- 프로필 이미지는 B6-6 (업로드 + 저장소 선택)에서 붙는다. -->
-
-                    <button type="submit" class="btn btn-primary">저장</button>
-                    <a class="btn btn-link" th:href="@{/profile/me}">취소</a>
-                </form>
-            </div>
+        <!-- 전역 에러 (닉네임 중복). 가입 폼과 같은 자리, 같은 방식.
+             #fields 는 th:object 가 걸린 form 안에서만 동작한다. -->
+        <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
+            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
         </div>
-    </div>
+
+        <div>
+            <label for="nickname" class="field-label">닉네임</label>
+            <input type="text" id="nickname" class="input" th:field="*{nickname}"
+                   th:classappend="${#fields.hasErrors('nickname')} ? 'field-error'"
+                   placeholder="2~20자"/>
+            <p class="mt-1 text-sm text-danger"
+               th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></p>
+        </div>
+
+        <div>
+            <label for="bio" class="field-label">자기소개</label>
+            <textarea id="bio" class="input leading-relaxed" th:field="*{bio}"
+                      th:classappend="${#fields.hasErrors('bio')} ? 'field-error'"
+                      rows="4" maxlength="256" placeholder="256자 이내"></textarea>
+            <p class="mt-1 text-sm text-danger"
+               th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}"></p>
+        </div>
+
+        <!-- 프로필 이미지는 B6-6 (업로드 + 저장소 선택)에서 붙는다. -->
+
+        <div class="flex gap-2 pt-1">
+            <button type="submit" class="btn btn-primary">저장</button>
+            <a class="btn btn-outline" th:href="@{/profile/me}">취소</a>
+        </div>
+    </form>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

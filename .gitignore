@@ -45,3 +45,6 @@ application-prod.yml
 .gstack/
 .DS_Store
 .DS_Store
+
+### Node (Tailwind 빌드 도구) ###
+node_modules/

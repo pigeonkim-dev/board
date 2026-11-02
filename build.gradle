@@ -28,3 +28,47 @@ subprojects {
         useJUnitPlatform()
     }
 }
+
+// ── 화면 CSS (Tailwind 4) ── 2026-10-29. IdP 와 같은 방식이다 (dev/CLAUDE.md "화면 CSS — Tailwind 4, 공통 테마").
+// 순서: npmInstall(루트, 한 번) → tailwindCss(사이트마다) → processResources(→ jar).
+// bootRun·bootJar·test 가 모두 processResources 를 거치므로 따로 부를 일이 없다.
+// inputs/outputs 가 지난번과 같으면 Gradle 이 건너뛴다(UP-TO-DATE). 화면을 안 고친 빌드는 느려지지 않는다.
+// 이 저장소를 빌드하는 곳에는 Node(npm)가 있어야 한다. 운영 서버는 jar 만 받으므로 필요 없다.
+
+// package-lock.json 에 적힌 버전 그대로 Tailwind 를 루트의 node_modules 에 깐다. 두 사이트가 같이 쓴다
+def npmInstall = tasks.register('npmInstall', Exec) {
+    group = 'frontend'
+    inputs.file('package-lock.json')
+    outputs.dir('node_modules')
+    commandLine 'npm', 'ci'
+}
+
+// CSS 를 만드는 사이트는 둘이다. core·web-common 은 실행하지 않으므로 CSS 를 만들지 않는다.
+configure([project(':board-web-user'), project(':board-web-admin')]) {
+    // web-common 의 템플릿(로그인, 오류)과 테마 복사본도 읽어야 한다. 두 사이트가 같이 쓰기 때문이다.
+    // 이것을 빼면 로그인 화면에만 쓴 클래스가 결과 CSS 에서 빠진다.
+    def common = project(':board-web-common').projectDir
+
+    // src/main/css/tailwind/app.css 를 읽고, 템플릿에 실제로 쓴 클래스만 담은 CSS 하나를 만든다
+    def tailwindCss = tasks.register('tailwindCss', Exec) {
+        group = 'frontend'
+        dependsOn npmInstall
+        inputs.dir('src/main/css/tailwind')
+        inputs.dir('src/main/resources/templates')
+        inputs.dir(new File(common, 'src/main/css/tailwind'))
+        inputs.dir(new File(common, 'src/main/resources/templates'))
+        inputs.file(rootProject.file('package-lock.json'))
+        outputs.dir('build/tailwind')
+        // npx 대신 루트 node_modules 의 실행 파일을 바로 부른다. 모듈 폴더에는 node_modules 가 없기 때문이다
+        commandLine rootProject.file('node_modules/.bin/tailwindcss').path,
+                '-i', 'src/main/css/tailwind/app.css',
+                '-o', 'build/tailwind/static/css/app.css',
+                '--minify'
+    }
+
+    // 리소스를 build/resources/main 으로 복사할 때 만든 CSS 도 같이 넣는다 → jar 안의 /static/css/app.css
+    tasks.named('processResources') {
+        dependsOn tailwindCss
+        from('build/tailwind')
+    }
+}
