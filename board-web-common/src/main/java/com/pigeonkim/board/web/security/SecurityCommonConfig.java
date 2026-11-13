@@ -1,19 +1,55 @@
 package com.pigeonkim.board.web.security;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configurers.oauth2.client.OidcBackChannelLogoutHandler;
+import org.springframework.security.oauth2.client.oidc.session.InMemoryOidcSessionRegistry;
+import org.springframework.security.oauth2.client.oidc.session.OidcSessionRegistry;
+import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.web.context.DelegatingSecurityContextRepository;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 
 /**
  * 두 사이트가 같이 쓰는 시큐리티 '부품'. 규칙(어느 주소를 누가 보나)은 사이트마다 자기 SecurityConfig 에 둔다.
  */
 @Configuration
 public class SecurityCommonConfig {
+    @Bean
+    public SecurityContextRepository securityContextRepository() {
+        return new DelegatingSecurityContextRepository(
+                new RequestAttributeSecurityContextRepository(),
+                new HttpSessionSecurityContextRepository()
+        );
+    }
 
-    // TODO 공통-3  user-web 의 SecurityConfig 에서 securityContextRepository() @Bean 메서드를 통째로 옮겨 온다 (import 넷 포함).
+    @Bean
+    public OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler(
+            ClientRegistrationRepository clientRegistrationRepository) {
 
-    // TODO 공통-4  user-web 의 SecurityConfig 에 있는 private oidcLogoutSuccessHandler(...) 를 여기로 옮기되 @Bean 으로 바꾼다.
-    //   @Bean
-    //   public LogoutSuccessHandler oidcLogoutSuccessHandler(ClientRegistrationRepository clientRegistrationRepository) { ...같은 몸통... }
-    //   반환 타입을 인터페이스 LogoutSuccessHandler 로 — 쓰는 쪽은 "로그아웃 뒤에 무엇을 하는 것" 만 알면 된다.
-    //   import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-    //   ClientRegistrationRepository 는 각 앱의 yaml 등록에서 생긴 빈이 들어온다 — 그래서 user-web 은 board, admin-web 은 board-admin 으로 로그아웃된다.
+        OidcClientInitiatedLogoutSuccessHandler handler = new OidcClientInitiatedLogoutSuccessHandler(
+                clientRegistrationRepository
+        );
+
+        handler.setPostLogoutRedirectUri("{baseUrl}/");
+        return handler;
+
+    }
+
+    @Bean
+    public OidcSessionRegistry oidcSessionRegistry() {
+        return new InMemoryOidcSessionRegistry();
+    }
+
+    @Bean
+    public OidcBackChannelLogoutHandler oidcBackChannelLogoutHandler(OidcSessionRegistry oidcSessionRegistry,
+                                                                     @Value("${server.servlet.session.cookie.name}") String sessionCookieName) {
+        OidcBackChannelLogoutHandler handler = new OidcBackChannelLogoutHandler(oidcSessionRegistry);
+        handler.setSessionCookieName(sessionCookieName);
+
+        return handler;
+    }
 }

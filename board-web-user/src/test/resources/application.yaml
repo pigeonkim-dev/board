@@ -11,6 +11,12 @@ board:
   oauth2:
     registration-id: board
 
+server:
+  servlet:
+    session:
+      cookie:
+        name: BOARDSESSION
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/board_test
