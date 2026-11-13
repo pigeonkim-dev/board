@@ -6,37 +6,55 @@
 <header th:replace="~{fragments/layout :: navbar}"></header>
 
 <main class="mx-auto max-w-3xl px-4 py-8">
-    <div class="mb-6 flex items-end justify-between gap-4">
+    <div class="mb-6">
         <h1 class="text-3xl">게시글</h1>
+    </div>
+
+    <!-- 표 위 줄: 글 수와 새 글 쓰기. 목록 주소가 검색어를 받지 않아 검색칸은 두지 않는다 -->
+    <div class="table-toolbar" th:unless="${posts.empty}">
+        <p class="meta tabular-nums" th:text="'전체 ' + ${posts.totalElements} + '개'">전체 24개</p>
         <a class="btn btn-primary" sec:authorize="isAuthenticated()" th:href="@{/board/posts/new}">새 글 쓰기</a>
     </div>
 
-    <!-- 표 대신 줄 목록이다. 폰 폭에서 다섯 칸 표는 제목이 한두 글자로 잘린다.
-         한 줄 = 제목(+댓글 수) 위, 작성자·날짜 아래. 글 번호는 넓은 화면에서만 왼쪽에 둔다. -->
-    <ol class="card divide-y divide-line-soft" th:unless="${posts.empty}">
-        <li th:each="post : ${posts.content}">
-            <a class="flex gap-4 px-5 py-4 no-underline hover:bg-line-soft/50"
-               th:href="@{/board/posts/{id}(id=${post.id}, page=${posts.number})}">
-                <span class="hidden w-10 shrink-0 pt-0.5 text-right text-sm text-ink-muted tabular-nums sm:block"
-                      th:text="${post.id}">1</span>
-                <span class="min-w-0 flex-1">
-                    <span class="flex items-baseline gap-2">
-                        <span class="truncate text-[17px] font-semibold text-ink" th:text="${post.title}">제목</span>
-                        <span class="shrink-0 text-sm text-ink-sub tabular-nums"
+    <!-- 테두리 있는 표. 폰 폭에서는 번호·작성자·날짜 칸을 숨기고 작성자·날짜를 제목 아래에 붙인다
+         (다섯 칸을 폰에 다 펴면 제목이 한두 글자로 잘린다) -->
+    <div class="data-table-wrap" th:unless="${posts.empty}">
+        <table class="data-table table-fixed">
+            <thead>
+            <tr>
+                <th scope="col" class="hidden w-16 text-right sm:table-cell">번호</th>
+                <th scope="col">제목</th>
+                <th scope="col" class="hidden w-32 sm:table-cell">작성자</th>
+                <th scope="col" class="hidden w-40 sm:table-cell">작성일</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="post : ${posts.content}">
+                <td class="hidden text-right text-ink-muted tabular-nums sm:table-cell" th:text="${post.id}">1</td>
+                <td class="min-w-0">
+                    <span class="flex items-center gap-2">
+                        <a class="row-link truncate"
+                           th:href="@{/board/posts/{id}(id=${post.id}, page=${posts.number})}"
+                           th:text="${post.title}">제목</a>
+                        <span class="badge badge-muted"
                               th:if="${post.commentCount > 0}"
-                              th:text="'[' + ${post.commentCount} + ']'"
-                              th:attr="aria-label='댓글 ' + ${post.commentCount} + '개'">[3]</span>
+                              th:text="${post.commentCount}"
+                              th:attr="aria-label='댓글 ' + ${post.commentCount} + '개'">3</span>
                     </span>
-                    <span class="meta mt-1 flex gap-3">
+                    <span class="meta mt-1 flex gap-3 sm:hidden">
                         <span th:text="${post.authorNickname}">작성자</span>
                         <time th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2026-10-29 12:00</time>
                     </span>
-                </span>
-            </a>
-        </li>
-    </ol>
+                </td>
+                <td class="hidden text-ink-sub sm:table-cell" th:text="${post.authorNickname}">작성자</td>
+                <td class="hidden text-ink-muted tabular-nums whitespace-nowrap sm:table-cell"
+                    th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2026-10-29 12:00</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 
-    <div th:if="${posts.empty}" class="card px-5 py-14 text-center">
+    <div th:if="${posts.empty}" class="data-table-wrap px-5 py-14 text-center">
         <p class="text-ink-sub">아직 쓴 글이 없습니다.</p>
         <a class="btn btn-primary mt-5" sec:authorize="isAuthenticated()"
            th:href="@{/board/posts/new}">첫 글 쓰기</a>
@@ -44,15 +62,27 @@
            th:href="@{/login}">로그인하고 글쓰기</a>
     </div>
 
-    <nav class="mt-6 flex items-center justify-center gap-3" th:if="${posts.totalPages > 1}" aria-label="페이지 이동">
-        <a class="page-link" th:classappend="${!posts.hasPrevious()} ? 'disabled'"
-           th:attr="aria-disabled=${!posts.hasPrevious()}"
-           th:href="@{/board/posts(page=${posts.number - 1})}">이전</a>
-        <span class="meta tabular-nums" th:text="${(posts.number + 1) + ' / ' + posts.totalPages}">1 / 3</span>
-        <a class="page-link" th:classappend="${!posts.hasNext()} ? 'disabled'"
-           th:attr="aria-disabled=${!posts.hasNext()}"
-           th:href="@{/board/posts(page=${posts.number + 1})}">다음</a>
-    </nav>
+    <!-- 표 아래 줄: 몇 개 중 몇–몇, 쪽 번호. 쪽 번호는 지금 쪽 앞뒤로 최대 다섯 개만 보인다.
+         posts.number 는 0 부터 센다. 화면에는 1 을 더해 보인다 -->
+    <div class="table-footer" th:if="${posts.totalPages > 1}"
+         th:with="first=${posts.number - 2 > 0 ? posts.number - 2 : 0},
+                  last=${first + 4 < posts.totalPages - 1 ? first + 4 : posts.totalPages - 1}">
+        <p class="meta tabular-nums"
+           th:text="${posts.totalElements} + '개 중 ' + ${posts.number * posts.size + 1} + '–' + ${posts.number * posts.size + posts.numberOfElements}">24개 중 1–10</p>
+
+        <nav class="pager" aria-label="페이지 이동">
+            <a class="pager-item" th:classappend="${!posts.hasPrevious()} ? 'disabled'"
+               th:attr="aria-disabled=${!posts.hasPrevious()}"
+               th:href="@{/board/posts(page=${posts.number - 1})}">이전</a>
+            <a class="pager-item" th:each="i : ${#numbers.sequence(first, last)}"
+               th:href="@{/board/posts(page=${i})}"
+               th:attr="aria-current=${i == posts.number} ? 'page' : null"
+               th:text="${i + 1}">1</a>
+            <a class="pager-item" th:classappend="${!posts.hasNext()} ? 'disabled'"
+               th:attr="aria-disabled=${!posts.hasNext()}"
+               th:href="@{/board/posts(page=${posts.number + 1})}">다음</a>
+        </nav>
+    </div>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

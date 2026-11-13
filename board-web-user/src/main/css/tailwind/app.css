@@ -16,9 +16,9 @@
 
 /* 이 사이트에만 있는 부품 */
 @layer components {
-    /* 사이트 이름. 제목 글꼴에 파란 그림자 — IdP 의 로고와 같은 모양이라 두 사이트가 한 가족으로 보인다 */
+    /* 사이트 이름. 본문 글꼴의 굵은 글씨 (2026-11-13 밝은 테마에서 그림자를 뺐다) */
     .logo {
-        @apply font-display text-2xl tracking-wide text-ink no-underline [text-shadow:2px_2px_0_var(--color-brand)];
+        @apply text-xl font-bold tracking-tight text-ink no-underline;
     }
     /* 상단 띠의 메뉴 글자. 폰에서 세로로 펼쳐질 때 누를 자리가 넉넉하게 위아래 여백을 준다 */
     .nav-link {
@@ -45,11 +45,64 @@
         @apply size-5 accent-brand;
     }
 
-    /* 목록 아래 이전·다음 */
-    .page-link {
-        @apply rounded-[10px] border border-line bg-surface px-4 py-2 text-sm text-ink no-underline hover:border-silver;
+    /* ---- 목록 화면 (2026-11-13, shadcn 기본 data-table 모양을 참고해 새로 씀) ---- */
+
+    /* 표 위의 줄. 왼쪽은 글 수 같은 요약, 오른쪽은 버튼. 폰에서는 두 줄로 내려간다 */
+    .table-toolbar {
+        @apply mb-3 flex flex-wrap items-center justify-between gap-3;
     }
-    .page-link.disabled {
+
+    /* 테두리 있는 표. 바깥 상자가 테두리와 둥근 모서리를 맡고, 표는 그 안에 꽉 찬다 */
+    .data-table-wrap {
+        @apply overflow-hidden rounded-(--radius-ui) border border-line bg-surface;
+    }
+    .data-table {
+        @apply w-full border-collapse text-left text-sm;
+    }
+    .data-table th {
+        @apply h-10 border-b border-line px-4 text-left align-middle font-medium whitespace-nowrap text-ink-muted;
+    }
+    .data-table td {
+        @apply border-b border-line-soft px-4 py-3 align-middle;
+    }
+    .data-table tbody tr:last-child td {
+        @apply border-b-0;
+    }
+    .data-table tbody tr {
+        @apply transition-colors hover:bg-muted/50 motion-reduce:transition-none;
+    }
+    /* 제목 칸의 링크. 밑줄 없이 굵게, 마우스를 올리면 밑줄 */
+    .data-table .row-link {
+        @apply font-medium text-ink no-underline hover:underline;
+    }
+
+    /* 작은 표시 딱지. 색은 badge-muted / badge-brand 를 함께 붙인다 */
+    .badge {
+        @apply inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap tabular-nums;
+    }
+    .badge-muted {
+        @apply border-transparent bg-muted text-ink-sub;
+    }
+    .badge-brand {
+        @apply border-transparent bg-brand text-white;
+    }
+
+    /* 표 아래 줄. 왼쪽은 "몇 개 중 몇–몇", 오른쪽은 쪽 번호 */
+    .table-footer {
+        @apply mt-3 flex flex-wrap items-center justify-between gap-3;
+    }
+    .pager {
+        @apply flex items-center gap-1;
+    }
+    /* 쪽 번호 한 칸. 누를 자리가 폰에서도 넉넉하게 36px 정사각 이상 */
+    .pager-item {
+        @apply inline-flex h-9 min-w-9 items-center justify-center rounded-md border border-transparent px-3
+               text-sm text-ink no-underline tabular-nums hover:bg-muted;
+    }
+    .pager-item[aria-current="page"] {
+        @apply border-line bg-surface font-semibold shadow-xs;
+    }
+    .pager-item.disabled {
         @apply pointer-events-none opacity-40;
     }
 }

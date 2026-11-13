@@ -1,5 +1,6 @@
 /*
- * IdP 와 board 가 같이 쓰는 테마 (2026-10-20, 2026-10-29 어두운 테마로 바꿈). 두 사이트가 한 가족으로 보이게 하는 공통 값과 공통 부품.
+ * IdP 와 board 가 같이 쓰는 테마 (2026-10-20, 2026-10-29 어두운 테마, 2026-11-13 밝은 테마로 바꿈).
+ * 두 사이트가 한 가족으로 보이게 하는 공통 값과 공통 부품.
  *
  * 원본은 이 파일 하나다. 각 저장소에는 복사본을 커밋한다.
  *   IdP   : OAuth2-SpringAuthorizationServer/code/src/main/css/tailwind/theme.css
@@ -8,51 +9,57 @@
  * 저장소가 이 파일을 직접 가리키지 않는 이유: 저장소만 받은 곳(다른 컴퓨터, 면접관)에서도 빌드가 돼야 한다.
  *
  * 들어 있는 것
- *   @theme             색, 글꼴. 여기 적은 이름이 그대로 Tailwind 클래스가 된다
+ *   @theme             색, 글꼴, 모서리. 여기 적은 이름이 그대로 Tailwind 클래스가 된다
  *                      (--color-brand 를 적으면 bg-brand, text-brand, border-brand 가 생긴다)
- *   @layer base        모든 화면의 바탕 (배경, 글자색, 한글 줄바꿈, 제목 글꼴)
+ *   @layer base        모든 화면의 바탕 (배경, 글자색, 한글 줄바꿈, 제목)
  *   @layer components  두 사이트에 다 있는 부품 (버튼, 입력칸, 라벨, 카드, 알림 띠)
  *
  * 화면 배치(여백, 열, 너비)는 여기 두지 않는다. 각 화면이 Tailwind 클래스로 직접 쓴다.
  *
- * 색 (2026-10-29 사용자 지정): 메인 = 검정·남색·짙은 파랑, 서브 = 흰색·은색·회색.
- *   검정 바탕(page) 위에 남색 카드(surface)를 올리고, 가장 중요한 버튼만 짙은 파랑(brand)에 은색 그림자를 단다.
- *   bg-white 를 화면에 직접 쓰지 않는다. 바탕은 bg-page, 카드·띠는 bg-surface 다.
+ * 색 (2026-11-13 사용자 결정): shadcn/ui 기본 스타일과 비슷한 밝은 테마. 코드는 가져오지 않고 값만 비슷하게 새로 정했다.
+ *   흰 바탕(page) 위에 흰 카드(surface)를 옅은 회색 테두리(line)로 구분한다. 가장 중요한 버튼은 거의 검정(brand)이다.
+ *   안쪽 안내 상자처럼 바탕과 달라야 하는 칸은 옅은 회색(muted)이다.
+ *   색 이름은 어두운 테마 때와 같다(page, surface, ink, line ...). 값만 바꿔서 두 사이트의 화면 마크업을 고치지 않아도 되게 했다.
  *
- * 글꼴은 이 파일이 싣지 않는다. 각 사이트의 <head> 가 CDN 링크로 둘 다 싣는다.
- *   Pretendard      본문         https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css
- *   Black Han Sans  제목(h1)·로고  https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap
+ * 글꼴은 이 파일이 싣지 않는다. 각 사이트의 <head> 가 CDN 링크로 싣는다.
+ *   Pretendard      본문·제목     https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css
+ *   Black Han Sans  (선택) 장식 글꼴. 제목은 이제 본문 글꼴의 굵은 글씨다. font-display 클래스를 쓰는 곳만 이 글꼴이다
+ *                   https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap
  */
 
 @theme {
     --font-sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", system-ui, sans-serif;
     --font-display: "Black Han Sans", "Pretendard", "Apple SD Gothic Neo", sans-serif;
 
-    --color-brand: #2450d8;      /* 짙은 파랑. 가장 중요한 버튼 */
-    --color-brand-dark: #1c41b3; /* 그 버튼에 마우스를 올렸을 때 */
-    --color-silver: #c3c8d2;     /* 은색. 가장 중요한 버튼의 그림자, 입력칸을 눌렀을 때의 테두리 */
+    --radius-ui: 0.625rem;       /* 버튼, 입력칸, 알림 띠의 모서리 (10px) */
+    --radius-box: 0.875rem;      /* 카드의 모서리 (14px) */
 
-    --color-page: #08090c;       /* 검정. 화면 바탕 */
-    --color-surface: #111a2e;    /* 남색. 카드, 상단 띠, 알림 상자 */
-    --color-ink: #ffffff;        /* 본문 글자 */
-    --color-ink-sub: #c3c8d2;    /* 라벨 같은 보조 글자 (은색) */
-    --color-ink-muted: #8a91a0;  /* 안내, 꼬리말 같은 흐린 글자 (회색) */
-    --color-line: #2a3550;       /* 입력칸, 버튼 테두리 */
-    --color-line-soft: #1c2640;  /* 카드 안 구분선 */
+    --color-brand: #18181b;      /* 거의 검정. 가장 중요한 버튼 */
+    --color-brand-dark: #3f3f46; /* 그 버튼에 마우스를 올렸을 때 (조금 옅게) */
+    --color-silver: #a1a1aa;     /* 입력칸·버튼을 눌렀을 때의 테두리와 빛 */
 
-    --color-danger: #f05252;
-    --color-danger-bg: #3a1c22;
-    --color-danger-ink: #ffb4bf;
-    --color-ok-bg: #12301f;
-    --color-ok-ink: #8fe3b4;
-    --color-warn-bg: #33270f;
-    --color-warn-ink: #f7d48b;
+    --color-page: #ffffff;       /* 흰색. 화면 바탕 */
+    --color-surface: #ffffff;    /* 흰색. 카드, 상단 띠 (테두리로 바탕과 구분한다) */
+    --color-muted: #f4f4f5;      /* 옅은 회색. 카드 안 안내 상자, 고칠 수 없는 칸, 마우스를 올린 흰 버튼 */
+    --color-ink: #09090b;        /* 본문 글자 */
+    --color-ink-sub: #27272a;    /* 라벨 같은 보조 글자 */
+    --color-ink-muted: #71717a;  /* 안내, 꼬리말 같은 흐린 글자 */
+    --color-line: #e4e4e7;       /* 입력칸, 버튼, 카드 테두리 */
+    --color-line-soft: #f4f4f5;  /* 카드 안 구분선 */
+
+    --color-danger: #dc2626;
+    --color-danger-bg: #fef2f2;
+    --color-danger-ink: #991b1b;
+    --color-ok-bg: #f0fdf4;
+    --color-ok-ink: #166534;
+    --color-warn-bg: #fffbeb;
+    --color-warn-ink: #92400e;
 }
 
 @layer base {
     html {
-        /* 브라우저가 그리는 것(스크롤바, 자동완성 배경, 날짜 칸)도 어두운 쪽으로 */
-        color-scheme: dark;
+        /* 브라우저가 그리는 것(스크롤바, 자동완성 배경, 날짜 칸)도 밝은 쪽으로 */
+        color-scheme: light;
     }
     body {
         @apply bg-page font-sans text-ink antialiased;
@@ -61,13 +68,13 @@
         word-break: keep-all;
         overflow-wrap: break-word;
     }
-    /* 화면 제목은 두꺼운 제목 글꼴. 굵기가 글꼴에 이미 들어 있어 font-bold 를 겹쳐 쓰면 브라우저가 한 번 더 굵힌다 */
+    /* 화면 제목은 본문 글꼴의 굵은 글씨에 글자 사이를 조금 좁힌다 */
     h1 {
-        @apply font-display font-normal tracking-wide;
+        @apply font-semibold tracking-tight;
     }
-    /* 링크는 흰 글자에 은색 밑줄. 파랑은 버튼에만 써서 "누를 곳"이 하나로 보이게 한다 */
+    /* 링크는 본문 색에 옅은 밑줄. 마우스를 올리면 밑줄이 진해진다 */
     a {
-        @apply text-ink underline decoration-silver/50 underline-offset-4 hover:decoration-ink;
+        @apply text-ink underline decoration-ink-muted/40 underline-offset-4 hover:decoration-ink;
     }
     :focus-visible {
         @apply outline-2 outline-offset-2 outline-silver;
@@ -77,57 +84,55 @@
 @layer components {
     /* 버튼. 모양은 btn, 색은 btn-primary / btn-outline / btn-danger 를 함께 붙인다. <a> 에도 쓴다 */
     .btn {
-        @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-[10px] px-4 py-3
-               text-base font-semibold no-underline transition
+        @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-(--radius-ui) px-4 py-2.5
+               text-sm font-medium no-underline shadow-xs transition-colors
                disabled:cursor-not-allowed disabled:opacity-50
                motion-reduce:transition-none;
     }
-    /* 화면에서 가장 중요한 버튼 하나. 은색 그림자가 붙고, 누르면 그림자 쪽으로 눌려 들어간다 */
+    /* 화면에서 가장 중요한 버튼 하나 */
     .btn-primary {
-        @apply bg-brand text-white shadow-[4px_4px_0_var(--color-silver)]
-               hover:bg-brand-dark hover:text-white
-               active:translate-x-1 active:translate-y-1 active:shadow-none;
+        @apply bg-brand text-white hover:bg-brand-dark hover:text-white;
     }
     .btn-outline {
-        @apply border border-line bg-surface text-ink hover:border-silver hover:text-ink;
+        @apply border border-line bg-surface text-ink hover:bg-muted hover:text-ink;
     }
     .btn-danger {
-        @apply bg-danger text-white hover:bg-red-600 hover:text-white;
+        @apply bg-danger text-white hover:bg-red-700 hover:text-white;
     }
 
-    /* 입력칸. 글자를 16px(text-base) 밑으로 내리지 않는다 — 아이폰 사파리가 칸을 누를 때 화면을 확대한다 */
+    /* 입력칸. 폰에서는 글자를 16px(text-base) 밑으로 내리지 않는다 — 아이폰 사파리가 칸을 누를 때 화면을 확대한다 */
     .input {
-        @apply block w-full rounded-[10px] border-[1.5px] border-line bg-page px-3.5 py-3 text-base text-ink
-               placeholder:text-ink-muted
-               focus:border-silver focus:ring-3 focus:ring-silver/30 focus:outline-none;
+        @apply block w-full rounded-(--radius-ui) border border-line bg-surface px-3 py-2.5 text-base text-ink shadow-xs
+               placeholder:text-ink-muted md:text-sm
+               focus:border-silver focus:ring-3 focus:ring-silver/40 focus:outline-none;
     }
     .input.field-error {
         @apply border-danger focus:ring-danger/30;
     }
     /* 외부 로그인이 준 이메일처럼 고칠 수 없는 칸 */
     .input:read-only {
-        @apply cursor-not-allowed bg-surface text-ink-sub;
+        @apply cursor-not-allowed bg-muted text-ink-muted;
     }
 
     .field-label {
-        @apply mb-1.5 block text-sm text-ink-sub;
+        @apply mb-2 block text-sm font-medium text-ink-sub;
     }
 
     .card {
-        @apply rounded-[14px] border border-line bg-surface;
+        @apply rounded-(--radius-box) border border-line bg-surface shadow-sm;
     }
 
     /* 화면 위의 알림 띠. 색은 alert-danger / alert-ok / alert-warn 을 함께 붙인다 */
     .alert {
-        @apply rounded-[10px] border px-4 py-3 text-sm leading-relaxed;
+        @apply rounded-(--radius-ui) border px-4 py-3 text-sm leading-relaxed;
     }
     .alert-danger {
-        @apply border-danger/40 bg-danger-bg text-danger-ink;
+        @apply border-danger/30 bg-danger-bg text-danger-ink;
     }
     .alert-ok {
-        @apply border-ok-ink/30 bg-ok-bg text-ok-ink;
+        @apply border-ok-ink/20 bg-ok-bg text-ok-ink;
     }
     .alert-warn {
-        @apply border-warn-ink/30 bg-warn-bg text-warn-ink;
+        @apply border-warn-ink/20 bg-warn-bg text-warn-ink;
     }
 }

@@ -18,7 +18,7 @@
 @layer components {
     /* 사이트 이름. 사용자 사이트의 .logo 와 같은 모양이다 (board-web-user 의 입력 CSS) */
     .logo {
-        @apply font-display text-2xl tracking-wide text-ink no-underline [text-shadow:2px_2px_0_var(--color-brand)];
+        @apply text-xl font-bold tracking-tight text-ink no-underline;
     }
     /* 로고 옆 '관리' 표시. 경고색이라 지금 관리자 사이트에 있다는 것이 바로 보인다 */
     .admin-badge {
