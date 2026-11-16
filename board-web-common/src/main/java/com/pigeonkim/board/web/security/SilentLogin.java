@@ -7,8 +7,11 @@ package com.pigeonkim.board.web.security;
  */
 public final class SilentLogin {
 
-    /** 이 브라우저에서 이미 한 번 시도했다는 표시. 만료를 주지 않아 브라우저를 닫으면 사라진다 */
+    /** 이 브라우저에서 방금 시도했다는 표시. 수명이 지나면 메인에 올 때 다시 시도한다 */
     public static final String TRIED_COOKIE = "BOARD_SILENT_TRIED";
+
+    /** 시도 표시의 수명(초). 3분 (2026-11-16 사용자 결정, 11/15 의 1분을 대신한다) */
+    public static final int TRIED_COOKIE_MAX_AGE_SECONDS = 3 * 60;
 
     /** 지금 진행 중인 로그인이 조용한 시도라는 표시. 성공·실패 처리기가 보고 지운다 */
     public static final String IN_PROGRESS_ATTRIBUTE = SilentLogin.class.getName() + ".IN_PROGRESS";

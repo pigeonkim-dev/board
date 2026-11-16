@@ -59,11 +59,10 @@ public class SilentLoginFilter extends OncePerRequestFilter {
         Cookie cookie = new Cookie(SilentLogin.TRIED_COOKIE, "1");
         cookie.setPath("/");
         cookie.setHttpOnly(true);
+        cookie.setMaxAge(SilentLogin.TRIED_COOKIE_MAX_AGE_SECONDS);
         response.addCookie(cookie);
 
         request.getSession().setAttribute(SilentLogin.IN_PROGRESS_ATTRIBUTE, Boolean.TRUE);
         response.sendRedirect(request.getContextPath() + silentAuthorizationUri);
-        return;
-
     }
 }

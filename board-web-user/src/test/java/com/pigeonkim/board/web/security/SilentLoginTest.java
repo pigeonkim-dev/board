@@ -47,6 +47,7 @@ class SilentLoginTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(SILENT_START))
                 .andExpect(cookie().exists(SilentLogin.TRIED_COOKIE))
+                .andExpect(cookie().maxAge(SilentLogin.TRIED_COOKIE, SilentLogin.TRIED_COOKIE_MAX_AGE_SECONDS))
                 .andReturn();
 
         assertEquals(Boolean.TRUE, result.getRequest().getSession().getAttribute(SilentLogin.IN_PROGRESS_ATTRIBUTE));
